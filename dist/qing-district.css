@@ -1,0 +1,81 @@
+/**
+ * qing-district v0.0.1
+ * http://mycolorway.github.io/qing-district
+ *
+ * Copyright Mycolorway Design
+ * Released under the MIT license
+ * http://mycolorway.github.io/qing-district/license.html
+ *
+ * Date: 2016-09-8
+ */
+.qing-district {
+  position: relative;
+  width: 300px; }
+  .qing-district a {
+    text-decoration: none; }
+  .qing-district .district-info {
+    width: 100%;
+    padding: 0; }
+    .qing-district .district-info.empty {
+      cursor: pointer; }
+      .qing-district .district-info.empty .placeholder {
+        display: block;
+        color: #ccc; }
+    .qing-district .district-info .district-item {
+      display: inline-block;
+      margin-right: 5px;
+      margin: 5px 0 0 4px;
+      padding: 4px;
+      font-size: 14px;
+      line-height: 14px;
+      color: #333333;
+      background-color: #efefef;
+      border-radius: 2px; }
+      .qing-district .district-info .district-item:hover {
+        background-color: #efefef;
+        text-decoration: none; }
+    .qing-district .district-info .placeholder {
+      display: none;
+      line-height: 28px;
+      margin: 0 0 0 6px; }
+  .qing-district .district-popover {
+    position: absolute;
+    top: 29px;
+    left: 0;
+    width: 100%;
+    display: none;
+    padding: 20px;
+    border: 1px solid #ccc;
+    box-sizing: border-box;
+    background: #ffffff;
+    z-index: 10;
+    box-shadow: 0 4px 4px rgba(0, 0, 0, 0.2); }
+    .qing-district .district-popover .district-province dd {
+      margin-left: 50px; }
+    .qing-district .district-popover dl {
+      margin: 0 0 10px 0; }
+      .qing-district .district-popover dl:last-child {
+        margin: 0; }
+      .qing-district .district-popover dl dt {
+        width: 50px;
+        float: left;
+        line-height: 24px;
+        font-family: monospace;
+        color: #999999; }
+      .qing-district .district-popover dl dd {
+        margin: 0;
+        white-space: normal; }
+        .qing-district .district-popover dl dd a {
+          display: inline-block;
+          padding: 0 6px;
+          color: #333333;
+          line-height: 24px;
+          font-size: 14px; }
+          .qing-district .district-popover dl dd a.active {
+            color: #fff;
+            background-color: #8FB7E6;
+            border-radius: 2px; }
+            .qing-district .district-popover dl dd a.active:hover {
+              text-decoration: none; }
+  .qing-district.active .district-popover {
+    display: block; }

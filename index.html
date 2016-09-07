@@ -10,16 +10,48 @@
 	<script type="text/javascript" src="node_modules/jquery/dist/jquery.js"></script>
 	<script type="text/javascript" src="node_modules/qing-module/dist/qing-module.js"></script>
 	<script type="text/javascript" src="dist/qing-district.js"></script>
+  <script type="text/javascript" src="data.min.js"></script>
+  <style>
+    body {
+      font-family: -apple-system, BlinkMacSystemFont,
+        "Segoe UI", "Roboto", "Oxygen",
+        "Ubuntu", "Cantarell", "Fira Sans",
+        "Droid Sans", "Helvetica Neue", sans-serif;
+    }
+    html, body {
+      width: 100%;
+      height: 100%;
+    }
+    .vertical-container {
+      height: 50%;
+      width: 100%;
+      display: -webkit-flex;
+      display:         flex;
+      -webkit-align-items: center;
+              align-items: center;
+      -webkit-justify-content: center;
+              justify-content: center;
+    }
+  </style>
 	<script type="text/javascript">
 		$(function() {
       var qingDistrict = new QingDistrict({
-        el: '.test-el'
+        el: '.select-district',
+        dataSource: function(callback) {
+          callback(districtsData)
+        }
       });
 		});
 	</script>
 
 </head>
 <body>
-  <div class="test-el"></div>
+  <div class="vertical-container">
+    <div class="select-district">
+      <input type="hidden" name="province" data-province-field value="110000" />
+      <input type="hidden" name="city" data-city-field value ="110100" />
+      <input type="hidden" name="county" data-county-field value= "110105" />
+    </div>
+  </div>
 </body>
 </html>

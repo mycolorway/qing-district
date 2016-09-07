@@ -1,6 +1,114 @@
 
 .qing-district {
-  border: 1px solid #cccccc;
-  padding: 10px;
-  text-align: center;
+  position: relative;
+  width: 300px;
+  a {
+    text-decoration: none;
+  }
+
+  .district-info {
+    width: 100%;
+    // -ms-user-select: none;
+    // -moz-user-select: none;
+    // -webkit-user-select: none;
+    // user-select: none;
+    // overflow: hidden;
+    padding: 0;
+
+    &.empty {
+      cursor: pointer;
+
+      .placeholder {
+        display: block;
+        color: #ccc;
+      }
+    }
+
+    .district-item {
+      display: inline-block;
+      margin-right: 5px;
+      margin: 5px 0 0 4px;
+      padding: 4px;
+      font-size: 14px;
+      line-height: 14px;
+      color: #333333;
+      background-color: #efefef;
+      border-radius: 2px;
+
+      &:hover {
+        background-color: #efefef;
+        text-decoration: none;
+      }
+    }
+
+    .placeholder {
+      display: none;
+      line-height: 28px;
+      margin: 0 0 0 6px;
+    }
+  }
+
+  .district-popover {
+    position: absolute;
+    top: 29px;
+    left: 0;
+    width: 100%;
+    display: none;
+    padding: 20px;
+    border: 1px solid #ccc;
+    box-sizing: border-box;
+    background: #ffffff;
+    z-index: 10;
+    box-shadow: 0 4px 4px rgba(0, 0, 0, 0.2);
+
+    .district-province dd {
+      margin-left: 50px;
+    }
+
+    dl {
+      margin: 0 0 10px 0;
+
+      &:last-child {
+        margin: 0;
+      }
+
+      dt {
+        width: 50px;
+        float: left;
+        line-height: 24px;
+        font-family: monospace;
+        color: #999999;
+      }
+
+      dd {
+        margin: 0;
+        white-space: normal;
+
+        a {
+          display: inline-block;
+          padding: 0 6px;
+          color: #333333;
+          line-height: 24px;
+          font-size: 14px;
+
+          &.active {
+            color: #fff;
+            background-color: #8FB7E6;
+            border-radius: 2px;
+
+            &:hover {
+              text-decoration: none;
+            }
+          }
+        }
+      }
+    }
+  }
+
+  &.active {
+    .district-popover {
+      display: block;
+    }
+  }
+
 }
