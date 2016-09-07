@@ -1,0 +1,27 @@
+{
+  "name": "qing-district",
+  "version": "0.0.1",
+  "description": "District selection UI",
+  "homepage": "http://mycolorway.github.io/qing-district",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/mycolorway/qing-district.git"
+  },
+  "author": "farthinker <farthinker@gmail.com>",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/mycolorway/qing-district/issues"
+  },
+  "main": "dist/qing-district.js",
+  "scripts": {
+    "start": "gulp",
+    "test": "gulp test"
+  },
+  "dependencies": {
+    "jquery": "^3.1.0",
+    "qing-module": "~1.0.0"
+  },
+  "devDependencies": {
+    "qing-build": "^0.x"
+  }
+}
