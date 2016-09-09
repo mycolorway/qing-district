@@ -1,55 +1,55 @@
-class Controller
-  constructor: (@context, @type, @codes=[]) ->
-    @ref = $('<a class="district-item" href="javascript:;"></a>').hide()
-    @list = $('<div class="district-list"><dl><dd></dd></dl></div>').hide()
-    @field = @context.el.find("[data-#{@type}-field]")
-    @dataMap = @context.data[@type]
-    @_bind()
+ListView = require "./view/list-view.coffee"
+Ref = require "./view/ref.coffee"
+
+class Controller extends QingModule
+
+  opts:
+    target: null
+    dataStore: null
+    type: null
+    codes: []
+
+  constructor: ->
+    super
+    { @target, @type, @dataStore, @codes } = @opts
+    @field = @target.find("[data-#{@type}-field]")
+    @dataMap = @dataStore.findByType(@type)
+    @listView = new ListView()
+    @ref = new Ref()
     @_init()
+    @_bind()
 
   _init: ->
     code = @field.val()
-    if data = @dataMap[code]
-      @current = data
-      @ref.text(data.name).show()
-      @list.find("[data-code=#{code}]").addClass "active"
+    if item = @dataMap[code]
+      @current = item
+      @ref.linkTo(item)
+      @listView.highlightItem(item)
     @render()
 
   _bind: ->
-    @list.on "click", "a", @_onClickListItem
-    @ref.on "click", (e) =>
-      @show()
-      @context.showPopover()
+    @listView.on "select", (e, code) =>
+      @selectByCode code
+      @listView.hide()
+      @trigger "afterSelect", [@]
       false
 
-  _onClickListItem: (e) =>
-    $item = $(e.currentTarget)
-    @list.find("a").removeClass 'active'
-    $item.addClass('active')
-
-    @selectByCode $item.data('code')
-
-    unless @field.length > 0
-      @context.hidePopover()
-      return false
-
-    @context.afterSelect(@type)
-    false
+    @ref.on "visit", (e, code) =>
+      @selectByCode code
+      @listView.show()
+      @trigger "visit", @
+      false
 
   selectByCode: (code) ->
     @current = @dataMap[code]
-    @ref.text(@current.name).show()
+    @ref.linkTo @current
+    @listView.highlightItem @current
     @field.val @current.code
     @
 
   reset: ->
     @field.val null
-    @ref.text("").hide()
-    @
-
-  show: ->
-    @context.el.find(".district-list").hide()
-    @list.show()
+    @ref.reset()
     @
 
   setCodes: (codes) ->
@@ -60,18 +60,13 @@ class Controller
     !!@field.val()
 
   render: ->
-    @list.find('dd').empty()
     @codes = Object.keys(@dataMap) if @codes == "all"
-    for code in @codes
-      data = @dataMap[code]
-      $("""
-        <a title='#{data.name}' data-code='#{code}' href='javascript:;'>
-          #{data.name}
-        </a>
-      """).appendTo @list.find('dd')
-    if curCode = @current?.code
-      @list.find("[data-code=#{curCode}]").addClass "active"
-
+    return unless @codes
+    items = []
+    items.push @dataMap[code] for code in @codes
+    @listView.render(items)
+    @listView.highlightItem @dataMap[@current?.code]
+    @listView.show()
     @
 
 module.exports = Controller

@@ -8,11 +8,6 @@
 
   .district-info {
     width: 100%;
-    // -ms-user-select: none;
-    // -moz-user-select: none;
-    // -webkit-user-select: none;
-    // user-select: none;
-    // overflow: hidden;
     padding: 0;
 
     &.empty {
@@ -102,12 +97,6 @@
           }
         }
       }
-    }
-  }
-
-  &.active {
-    .district-popover {
-      display: block;
     }
   }
 

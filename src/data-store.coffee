@@ -1,5 +1,11 @@
-Util =
-  normalizeData: (data) ->
+class DataStore
+  constructor: (rawData) ->
+    @data = @formatData(rawData)
+
+  findByType: (type) ->
+    @data[type]
+
+  formatData: (data) ->
     return unless $.isArray data
     province = {}
     city = {}
@@ -23,4 +29,4 @@ Util =
             name: ct.name
     { province: province, city: city, county: county }
 
-module.exports = Util
+module.exports = DataStore

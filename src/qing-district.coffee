@@ -1,4 +1,5 @@
-Util = require "./util.coffee"
+DataStore = require "./data-store.coffee"
+Popover = require "./view/popover.coffee"
 Controller = require "./controller.coffee"
 
 class QingDistrict extends QingModule
@@ -8,11 +9,9 @@ class QingDistrict extends QingModule
     dataSource: null
 
   @_tpl: '''
-    <div class="qing-district">
+    <div class="qing-district-wrapper">
       <div class="district-info empty">
         <span class="placeholder">点击选择城市</span>
-      </div>
-      <div class="district-popover">
       </div>
     </div>
   '''
@@ -27,19 +26,40 @@ class QingDistrict extends QingModule
     unless $.isFunction(@opts.dataSource)
       throw new Error 'QingDistrict: option dataSource is required'
 
-    @opts.dataSource.call null, (data) =>
-      @data = Util.normalizeData(data)
+    @_render()
+    @popover = new Popover
+      target: @el
+      wrapper: @wrapper
 
-      @_render()
+    @opts.dataSource.call null, (data) =>
+      @dataStore = new DataStore(data)
+
+      @register new Controller(
+        target: @el,
+        dataStore: @dataStore,
+        type: "province",
+        codes: "all"
+      )
+      @register new Controller(
+        target: @el,
+        dataStore: @dataStore,
+        type: "city"
+      )
+      @register new Controller(
+        target: @el,
+        dataStore: @dataStore,
+        type: "county"
+      )
+
       @_bind()
 
-      @register new Controller(@, "province", "all")
-      @register new Controller(@, "city")
-      @register new Controller(@, "county")
       for type in ["province", "city", "county"]
-        @afterSelect type, true if @controllers[type].isSelected()
+        controller = @controllers[type]
+        if controller.isSelected()
+          controller.trigger "afterSelect", [controller, true]
 
-      @resetSelectedInfoStatus(true) if @isFullFilled()
+      @setInfoBarActive(true) if @isFullFilled()
+
       @trigger 'ready'
 
   isFullFilled: ->
@@ -48,69 +68,75 @@ class QingDistrict extends QingModule
     true
 
   register: (controller) ->
-    @el.find(".district-info").append controller.ref
-    @el.find(".district-popover").append controller.list
+    @el.find(".district-info").append controller.ref.el
+    @popover.el.append controller.listView.el
     @controllers ||= {}
     @controllers[controller.type] = controller
 
-  resetSelectedInfoStatus: (isEmpty) ->
-    @selectEl.find('.district-info').toggleClass "empty", !isEmpty
-
-  afterSelect: (type, init=false) ->
-    @resetSelectedInfoStatus(true) unless init
-    switch type
-      when "province"
-        curProvice = @controllers.province.current
-        codes = curProvice.cities
-        cityCtrl = @controllers.city
-        if codes.length == 1 &&
-            cityCtrl.dataMap[codes[0]].name == curProvice.name
-          cityCtrl.reset().selectByCode(codes[0]).ref.hide()
-          @afterSelect("city") unless init
-        else
-          cityCtrl.reset() unless init
-          cityCtrl.setCodes(codes).render(true).show()
-        @controllers.county.reset() unless init
-      when "city"
-        codes = @controllers.city.current.counties
-        @controllers.county.reset() unless init
-        @controllers.county.setCodes(codes).render(true).show()
-      else
-        @hidePopover()
+  setInfoBarActive: (active) ->
+    @wrapper.find('.district-info').toggleClass "empty", !active
 
   _render: ->
-    @selectEl = $(QingDistrict._tpl).data('district', @).prependTo @el
+    @wrapper = $(QingDistrict._tpl).data('district', @).prependTo @el
     @el.addClass ' qing-district'
       .data 'qingDistrict', @
 
   _bind: ->
-    @selectEl
+    @wrapper
       .on 'click', '.district-info', =>
-        if @selectEl.hasClass 'active'
-          @hidePopover()
+        if @wrapper.hasClass 'active'
+          @popover.setActive(false)
         else
-          @controllers.province.show()
-          @showPopover()
+          @controllers.province.render()
+          @popover.setActive(true)
 
-  showPopover: ->
-    @selectEl.addClass 'active'
+    @popover
+      .on "show", ->
+        @wrapper.addClass "active"
+      .on "hide", =>
+        @wrapper.removeClass "active"
+        unless @isFullFilled()
+          for type, controller of @controllers
+            controller.reset()
+            @setInfoBarActive(false)
 
-    $(document).off('click.qing-district').on 'click.qing-district', (e) =>
-      $target = $(e.target)
-      return unless @selectEl.hasClass('active')
-      return if @el.has($target).length or $target.is(@el)
-      @hidePopover()
+    @controllers.province
+      .on "afterSelect", (e, province, init) =>
+        @setInfoBarActive(true) unless init
+        codes = province.current.cities
+        city = @controllers.city
+        if codes.length == 1 &&
+            city.dataMap[codes[0]].name == province.current.name
+          city.reset().selectByCode(codes[0]).ref.el.hide()
+          city.trigger "afterSelect", city unless init
+        else
+          city.reset() unless init
+          city.setCodes(codes).render()
+        @controllers.county.reset() unless init
+      .on "visit", (e) =>
+        @controllers.city.listView.hide()
+        @controllers.county.listView.hide()
+        @popover.setActive(true)
 
-    @trigger("showPopover")
+    @controllers.city
+      .on "afterSelect", (e, city, init) =>
+        @setInfoBarActive(true) unless init
+        codes = city.current.counties
+        @controllers.county.reset() unless init
+        @controllers.county.setCodes(codes).render()
+      .on "visit", (e) =>
+        @controllers.province.listView.hide()
+        @controllers.county.listView.hide()
+        @popover.setActive true
 
-  hidePopover: ->
-    @selectEl.removeClass 'active'
-    $(document).off('.qing-district')
-    @trigger("hidePopover")
-    unless @isFullFilled()
-      for type, controller of @controllers
-        controller.reset()
-        @resetSelectedInfoStatus(false)
+    @controllers.county
+      .on "afterSelect", (e, county, init) =>
+        @setInfoBarActive(true) unless init
+        @popover.setActive(false)
+      .on "visit", (e) =>
+        @controllers.province.listView.hide()
+        @controllers.city.listView.hide()
+        @popover.setActive true
 
   destroy: ->
     @el.empty()

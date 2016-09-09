@@ -6,7 +6,7 @@
  * Released under the MIT license
  * http://mycolorway.github.io/qing-district/license.html
  *
- * Date: 2016-09-8
+ * Date: 2016-09-9
  */
 .qing-district {
   position: relative;
@@ -77,5 +77,3 @@
             border-radius: 2px; }
             .qing-district .district-popover dl dd a.active:hover {
               text-decoration: none; }
-  .qing-district.active .district-popover {
-    display: block; }
