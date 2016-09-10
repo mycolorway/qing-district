@@ -6,7 +6,7 @@
  * Released under the MIT license
  * http://mycolorway.github.io/qing-district/license.html
  *
- * Date: 2016-09-9
+ * Date: 2016-09-12
  */
 ;(function(root, factory) {
   if (typeof module === 'object' && module.exports) {
@@ -17,125 +17,24 @@
 }(this, function ($,QingModule) {
 var define, module, exports;
 var b = require=(function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
-var Controller, ListView, Ref,
+var DataStore,
   extend = function(child, parent) { for (var key in parent) { if (hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
   hasProp = {}.hasOwnProperty;
 
-ListView = require("./view/list-view.coffee");
+DataStore = (function(superClass) {
+  extend(DataStore, superClass);
 
-Ref = require("./view/ref.coffee");
-
-Controller = (function(superClass) {
-  extend(Controller, superClass);
-
-  Controller.prototype.opts = {
-    target: null,
-    dataStore: null,
-    type: null,
-    codes: []
-  };
-
-  function Controller() {
-    var ref;
-    Controller.__super__.constructor.apply(this, arguments);
-    ref = this.opts, this.target = ref.target, this.type = ref.type, this.dataStore = ref.dataStore, this.codes = ref.codes;
-    this.field = this.target.find("[data-" + this.type + "-field]");
-    this.dataMap = this.dataStore.findByType(this.type);
-    this.listView = new ListView();
-    this.ref = new Ref();
-    this._init();
-    this._bind();
+  function DataStore() {
+    return DataStore.__super__.constructor.apply(this, arguments);
   }
 
-  Controller.prototype._init = function() {
-    var code, item;
-    code = this.field.val();
-    if (item = this.dataMap[code]) {
-      this.current = item;
-      this.ref.linkTo(item);
-      this.listView.highlightItem(item);
-    }
-    return this.render();
-  };
-
-  Controller.prototype._bind = function() {
-    this.listView.on("select", (function(_this) {
-      return function(e, code) {
-        _this.selectByCode(code);
-        _this.listView.hide();
-        _this.trigger("afterSelect", [_this]);
-        return false;
+  DataStore.prototype.load = function(dataSource) {
+    return dataSource.call(null, (function(_this) {
+      return function(data) {
+        _this.data = _this.formatData(data);
+        return _this.trigger("loaded", [_this.data]);
       };
     })(this));
-    return this.ref.on("visit", (function(_this) {
-      return function(e, code) {
-        _this.selectByCode(code);
-        _this.listView.show();
-        _this.trigger("visit", _this);
-        return false;
-      };
-    })(this));
-  };
-
-  Controller.prototype.selectByCode = function(code) {
-    this.current = this.dataMap[code];
-    this.ref.linkTo(this.current);
-    this.listView.highlightItem(this.current);
-    this.field.val(this.current.code);
-    return this;
-  };
-
-  Controller.prototype.reset = function() {
-    this.field.val(null);
-    this.ref.reset();
-    return this;
-  };
-
-  Controller.prototype.setCodes = function(codes) {
-    this.codes = codes;
-    return this;
-  };
-
-  Controller.prototype.isSelected = function() {
-    return !!this.field.val();
-  };
-
-  Controller.prototype.render = function() {
-    var code, i, items, len, ref, ref1;
-    if (this.codes === "all") {
-      this.codes = Object.keys(this.dataMap);
-    }
-    if (!this.codes) {
-      return;
-    }
-    items = [];
-    ref = this.codes;
-    for (i = 0, len = ref.length; i < len; i++) {
-      code = ref[i];
-      items.push(this.dataMap[code]);
-    }
-    this.listView.render(items);
-    this.listView.highlightItem(this.dataMap[(ref1 = this.current) != null ? ref1.code : void 0]);
-    this.listView.show();
-    return this;
-  };
-
-  return Controller;
-
-})(QingModule);
-
-module.exports = Controller;
-
-},{"./view/list-view.coffee":3,"./view/ref.coffee":5}],2:[function(require,module,exports){
-var DataStore;
-
-DataStore = (function() {
-  function DataStore(rawData) {
-    this.data = this.formatData(rawData);
-  }
-
-  DataStore.prototype.findByType = function(type) {
-    return this.data[type];
   };
 
   DataStore.prototype.formatData = function(data) {
@@ -182,64 +81,214 @@ DataStore = (function() {
 
   return DataStore;
 
-})();
+})(QingModule);
 
 module.exports = DataStore;
 
-},{}],3:[function(require,module,exports){
-var ListView,
+},{}],2:[function(require,module,exports){
+var FieldProxyGroup,
   extend = function(child, parent) { for (var key in parent) { if (hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
   hasProp = {}.hasOwnProperty;
 
-ListView = (function(superClass) {
-  extend(ListView, superClass);
+FieldProxyGroup = (function(superClass) {
+  extend(FieldProxyGroup, superClass);
 
-  function ListView() {
-    ListView.__super__.constructor.apply(this, arguments);
-    this.el = $("<div class=\"district-list\">\n  <dl><dd></dd></dl>\n</div>").hide();
-    this.el.on("click", "a", (function(_this) {
+  FieldProxyGroup.prototype.opts = {
+    wrapper: null
+  };
+
+  function FieldProxyGroup() {
+    FieldProxyGroup.__super__.constructor.apply(this, arguments);
+    this.el = $("<div class=\"district-field-proxy-group\">\n  <span class=\"placeholder\">点击选择城市</span>\n</div>").appendTo(this.opts.wrapper);
+    this._bind();
+    this.setEmpty(true);
+  }
+
+  FieldProxyGroup.prototype._bind = function() {
+    return this.el.on("click", ".placeholder", (function(_this) {
+      return function() {
+        return _this.trigger("emptySelect");
+      };
+    })(this));
+  };
+
+  FieldProxyGroup.prototype.setEmpty = function(empty) {
+    return this.el.toggleClass("empty", empty);
+  };
+
+  return FieldProxyGroup;
+
+})(QingModule);
+
+module.exports = FieldProxyGroup;
+
+},{}],3:[function(require,module,exports){
+var FieldProxy,
+  extend = function(child, parent) { for (var key in parent) { if (hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
+  hasProp = {}.hasOwnProperty;
+
+FieldProxy = (function(superClass) {
+  extend(FieldProxy, superClass);
+
+  FieldProxy.prototype.opts = {
+    group: null,
+    data: null,
+    field: null
+  };
+
+  function FieldProxy() {
+    var ref;
+    FieldProxy.__super__.constructor.apply(this, arguments);
+    ref = this.opts, this.group = ref.group, this.data = ref.data, this.field = ref.field;
+    this.el = $('<a class="district-field-proxy" href="javascript:;"></a>').hide().appendTo(this.group.el);
+    this.el.on("click", (function(_this) {
       return function(e) {
-        var $item;
-        $item = $(e.currentTarget);
-        return _this.trigger("select", [$item.data("code")]);
+        return _this.setActive(true);
       };
     })(this));
   }
 
-  ListView.prototype.highlightItem = function(item) {
-    if (!item) {
-      return;
+  FieldProxy.prototype.restore = function() {
+    var code, item;
+    if (code = this.field.val()) {
+      this.setItem(item = this.data[code]);
+      return this.trigger("restore", [item]);
     }
-    this.el.find("a").removeClass("active");
-    return this.el.find("[data-code=" + item.code + "]").addClass("active");
   };
 
-  ListView.prototype.show = function() {
-    return this.el.show();
+  FieldProxy.prototype.isFilled = function() {
+    return !!this.field.val();
   };
 
-  ListView.prototype.hide = function() {
-    return this.el.hide();
-  };
-
-  ListView.prototype.render = function(items) {
-    var i, item, len, results;
-    this.el.find('dd').empty();
-    results = [];
-    for (i = 0, len = items.length; i < len; i++) {
-      item = items[i];
-      results.push($("<a title='" + item.name + "' data-code='" + item.code + "' href='javascript:;'>\n  " + item.name + "\n</a>").appendTo(this.el.find('dd')));
+  FieldProxy.prototype.setActive = function(active) {
+    this.el.text(this.el.text() || "_").toggle(active);
+    this.highlight(active);
+    if (active) {
+      this.trigger("active", this.el.data("item"));
     }
-    return results;
+    return this;
   };
 
-  return ListView;
+  FieldProxy.prototype.highlight = function(active) {
+    return this.el.toggleClass("active", active);
+  };
+
+  FieldProxy.prototype.getItem = function() {
+    return this.el.data("item");
+  };
+
+  FieldProxy.prototype.setItem = function(item) {
+    this.el.text(item.name).data("item", item).show();
+    this.field.val(item.code);
+    return this;
+  };
+
+  FieldProxy.prototype.clear = function() {
+    this.field.val(null);
+    this.el.text("").data("item", null).hide();
+    return this;
+  };
+
+  return FieldProxy;
 
 })(QingModule);
 
-module.exports = ListView;
+module.exports = FieldProxy;
 
 },{}],4:[function(require,module,exports){
+var List,
+  extend = function(child, parent) { for (var key in parent) { if (hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
+  hasProp = {}.hasOwnProperty;
+
+List = (function(superClass) {
+  extend(List, superClass);
+
+  List.prototype.opts = {
+    wrapper: null,
+    data: null,
+    codes: []
+  };
+
+  function List() {
+    var ref;
+    List.__super__.constructor.apply(this, arguments);
+    ref = this.opts, this.wrapper = ref.wrapper, this.data = ref.data, this.codes = ref.codes;
+    this.el = $("<div class=\"district-list\">\n  <dl><dd></dd></dl>\n</div>").hide().appendTo(this.wrapper);
+    this.render();
+    this._bind();
+  }
+
+  List.prototype.highlightItem = function(item) {
+    this.el.find("a").removeClass("active");
+    if (item) {
+      return this.el.find("[data-code=" + item.code + "]").addClass("active");
+    }
+  };
+
+  List.prototype.show = function() {
+    this.el.show();
+    return this.trigger("show");
+  };
+
+  List.prototype.hide = function() {
+    this.el.hide();
+    return this.trigger("hide");
+  };
+
+  List.prototype._bind = function() {
+    return this.el.on("click", "a", (function(_this) {
+      return function(e) {
+        var $item;
+        $item = $(e.currentTarget);
+        _this.setCurrent(_this.data[$item.data("code")]);
+        _this.hide();
+        _this.trigger("afterSelect", [_this.current]);
+        return false;
+      };
+    })(this));
+  };
+
+  List.prototype.setCurrent = function(item) {
+    this.highlightItem(this.current = item);
+    return this;
+  };
+
+  List.prototype.setCodes = function(codes) {
+    this.codes = codes;
+    return this;
+  };
+
+  List.prototype.isSelected = function() {
+    return !!this.field.val();
+  };
+
+  List.prototype.render = function() {
+    var code, i, item, len, ref, ref1;
+    if (this.codes === "all") {
+      this.codes = Object.keys(this.data);
+    }
+    if (!this.codes) {
+      return;
+    }
+    this.el.find('dd').empty();
+    ref = this.codes;
+    for (i = 0, len = ref.length; i < len; i++) {
+      code = ref[i];
+      item = this.data[code];
+      $("<a title='" + item.name + "' data-code='" + item.code + "' href='javascript:;'>\n  " + item.name + "\n</a>").appendTo(this.el.find('dd'));
+    }
+    this.highlightItem(this.data[(ref1 = this.current) != null ? ref1.code : void 0]);
+    this.show();
+    return this;
+  };
+
+  return List;
+
+})(QingModule);
+
+module.exports = List;
+
+},{}],5:[function(require,module,exports){
 var Popover,
   extend = function(child, parent) { for (var key in parent) { if (hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
   hasProp = {}.hasOwnProperty;
@@ -268,6 +317,9 @@ Popover = (function(superClass) {
   };
 
   Popover.prototype._show = function() {
+    if (this.el.is(":visible")) {
+      return;
+    }
     this.el.show();
     $(document).off('click.qing-district').on('click.qing-district', (function(_this) {
       return function(e) {
@@ -286,9 +338,17 @@ Popover = (function(superClass) {
   };
 
   Popover.prototype._hide = function() {
+    if (!this.el.is(":visible")) {
+      return;
+    }
     $(document).off('.qing-district');
     this.el.hide();
     return this.trigger("hide");
+  };
+
+  Popover.prototype.destroy = function() {
+    $(document).off('.qing-district');
+    return this.el.remove();
   };
 
   return Popover;
@@ -297,47 +357,20 @@ Popover = (function(superClass) {
 
 module.exports = Popover;
 
-},{}],5:[function(require,module,exports){
-var Ref,
-  extend = function(child, parent) { for (var key in parent) { if (hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
-  hasProp = {}.hasOwnProperty;
-
-Ref = (function(superClass) {
-  extend(Ref, superClass);
-
-  function Ref() {
-    this.el = $('<a class="district-item" href="javascript:;"></a>').hide();
-    this.el.on("click", (function(_this) {
-      return function(e) {
-        return _this.trigger("visit", [$(e.currentTarget).data("code")]);
-      };
-    })(this));
-  }
-
-  Ref.prototype.linkTo = function(item) {
-    return this.el.text(item.name).data("code", item.code).show();
-  };
-
-  Ref.prototype.reset = function() {
-    return this.el.text("").hide();
-  };
-
-  return Ref;
-
-})(QingModule);
-
-module.exports = Ref;
-
 },{}],"qing-district":[function(require,module,exports){
-var Controller, DataStore, Popover, QingDistrict,
+var DataStore, FieldProxy, FieldProxyGroup, List, Popover, QingDistrict,
   extend = function(child, parent) { for (var key in parent) { if (hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
   hasProp = {}.hasOwnProperty;
 
 DataStore = require("./data-store.coffee");
 
-Popover = require("./view/popover.coffee");
+Popover = require("./popover.coffee");
 
-Controller = require("./controller.coffee");
+FieldProxy = require("./field-proxy.coffee");
+
+FieldProxyGroup = require("./field-proxy-group.coffee");
+
+List = require("./list.coffee");
 
 QingDistrict = (function(superClass) {
   extend(QingDistrict, superClass);
@@ -347,11 +380,9 @@ QingDistrict = (function(superClass) {
     dataSource: null
   };
 
-  QingDistrict._tpl = '<div class="qing-district-wrapper">\n  <div class="district-info empty">\n    <span class="placeholder">点击选择城市</span>\n  </div>\n</div>';
-
   function QingDistrict(opts) {
-    QingDistrict.__super__.constructor.apply(this, arguments);
-    this.opts = $.extend({}, QingDistrict.opts, this.opts);
+    var initialized;
+    QingDistrict.__super__.constructor.call(this, $.extend({}, QingDistrict.opts, opts));
     this.el = $(this.opts.el);
     if (!(this.el.length > 0)) {
       throw new Error('QingDistrict: option el is required');
@@ -359,172 +390,201 @@ QingDistrict = (function(superClass) {
     if (!$.isFunction(this.opts.dataSource)) {
       throw new Error('QingDistrict: option dataSource is required');
     }
-    this._render();
+    if (initialized = this.el.data("qingDistrict")) {
+      return initialized;
+    }
+    this.dataStore = new DataStore();
+    this.dataStore.on("loaded", (function(_this) {
+      return function(e, data) {
+        _this._render();
+        _this._init(data);
+        _this._bind();
+        _this._restore();
+        return _this.trigger('ready');
+      };
+    })(this));
+    this.dataStore.load(this.opts.dataSource);
+  }
+
+  QingDistrict.prototype._render = function() {
+    this.wrapper = $("<div class=\"qing-district-wrapper\"></div>").data('district', this).prependTo(this.el);
+    return this.el.addClass(' qing-district').data('qingDistrict', this);
+  };
+
+  QingDistrict.prototype._init = function(data) {
     this.popover = new Popover({
       target: this.el,
       wrapper: this.wrapper
     });
-    this.opts.dataSource.call(null, (function(_this) {
-      return function(data) {
-        var controller, i, len, ref, type;
-        _this.dataStore = new DataStore(data);
-        _this.register(new Controller({
-          target: _this.el,
-          dataStore: _this.dataStore,
-          type: "province",
-          codes: "all"
-        }));
-        _this.register(new Controller({
-          target: _this.el,
-          dataStore: _this.dataStore,
-          type: "city"
-        }));
-        _this.register(new Controller({
-          target: _this.el,
-          dataStore: _this.dataStore,
-          type: "county"
-        }));
-        _this._bind();
-        ref = ["province", "city", "county"];
-        for (i = 0, len = ref.length; i < len; i++) {
-          type = ref[i];
-          controller = _this.controllers[type];
-          if (controller.isSelected()) {
-            controller.trigger("afterSelect", [controller, true]);
-          }
-        }
-        if (_this.isFullFilled()) {
-          _this.setInfoBarActive(true);
-        }
-        return _this.trigger('ready');
-      };
-    })(this));
-  }
-
-  QingDistrict.prototype.isFullFilled = function() {
-    var i, len, ref, type;
-    ref = ["province", "city", "county"];
-    for (i = 0, len = ref.length; i < len; i++) {
-      type = ref[i];
-      if (!this.controllers[type].isSelected()) {
-        return false;
-      }
-    }
-    return true;
-  };
-
-  QingDistrict.prototype.register = function(controller) {
-    this.el.find(".district-info").append(controller.ref.el);
-    this.popover.el.append(controller.listView.el);
-    this.controllers || (this.controllers = {});
-    return this.controllers[controller.type] = controller;
-  };
-
-  QingDistrict.prototype.setInfoBarActive = function(active) {
-    return this.wrapper.find('.district-info').toggleClass("empty", !active);
-  };
-
-  QingDistrict.prototype._render = function() {
-    this.wrapper = $(QingDistrict._tpl).data('district', this).prependTo(this.el);
-    return this.el.addClass(' qing-district').data('qingDistrict', this);
+    this.provinceList = new List({
+      wrapper: this.popover.el,
+      data: data.province,
+      codes: "all"
+    });
+    this.cityList = new List({
+      wrapper: this.popover.el,
+      data: data.city
+    });
+    this.countyList = new List({
+      wrapper: this.popover.el,
+      data: data.county
+    });
+    this.fieldGroup = new FieldProxyGroup({
+      wrapper: this.wrapper
+    });
+    this.provinceField = new FieldProxy({
+      group: this.fieldGroup,
+      data: data.province,
+      field: this.el.find("[data-province-field]")
+    });
+    this.cityField = new FieldProxy({
+      group: this.fieldGroup,
+      data: data.city,
+      field: this.el.find("[data-city-field]")
+    });
+    return this.countyField = new FieldProxy({
+      group: this.fieldGroup,
+      data: data.county,
+      field: this.el.find("[data-county-field]")
+    });
   };
 
   QingDistrict.prototype._bind = function() {
-    this.wrapper.on('click', '.district-info', (function(_this) {
+    this.fieldGroup.on("emptySelect", (function(_this) {
       return function() {
-        if (_this.wrapper.hasClass('active')) {
-          return _this.popover.setActive(false);
-        } else {
-          _this.controllers.province.render();
-          return _this.popover.setActive(true);
-        }
+        _this.cityList.hide();
+        _this.countyList.hide();
+        _this.provinceList.render();
+        return _this.popover.setActive(true);
       };
     })(this));
     this.popover.on("show", function() {
       return this.wrapper.addClass("active");
     }).on("hide", (function(_this) {
       return function() {
-        var controller, ref, results, type;
         _this.wrapper.removeClass("active");
+        _this._hideAllExcpet("none");
         if (!_this.isFullFilled()) {
-          ref = _this.controllers;
-          results = [];
-          for (type in ref) {
-            controller = ref[type];
-            controller.reset();
-            results.push(_this.setInfoBarActive(false));
-          }
-          return results;
+          _this.provinceList.setCurrent(null);
+          _this.provinceField.clear();
+          _this.cityField.clear();
+          _this.countyField.clear();
+          return _this.fieldGroup.setEmpty(true);
         }
       };
     })(this));
-    this.controllers.province.on("afterSelect", (function(_this) {
-      return function(e, province, init) {
-        var city, codes;
-        if (!init) {
-          _this.setInfoBarActive(true);
+    this.provinceField.on("active", (function(_this) {
+      return function(e, item) {
+        _this._hideAllExcpet("province");
+        if (item) {
+          _this.provinceList.setCurrent(item).show();
         }
-        codes = province.current.cities;
-        city = _this.controllers.city;
-        if (codes.length === 1 && city.dataMap[codes[0]].name === province.current.name) {
-          city.reset().selectByCode(codes[0]).ref.el.hide();
-          if (!init) {
-            city.trigger("afterSelect", city);
-          }
+        return _this.popover.setActive(true);
+      };
+    })(this));
+    this.provinceList.on("afterSelect", (function(_this) {
+      return function(e, province) {
+        var firstCity;
+        _this.fieldGroup.setEmpty(false);
+        _this.provinceField.setItem(province);
+        firstCity = _this.cityList.data[province.cities[0]];
+        if (_this._isMunicipality(province, firstCity)) {
+          _this.cityList.setCurrent(firstCity).hide();
+          _this.cityList.trigger("afterSelect", _this.cityList.current);
+          return _this.cityField.setActive(false);
         } else {
-          if (!init) {
-            city.reset();
-          }
-          city.setCodes(codes).render();
+          _this.cityList.setCodes(province.cities).render();
+          _this.cityField.clear().setActive(true);
+          return _this.countyField.clear();
         }
-        if (!init) {
-          return _this.controllers.county.reset();
-        }
-      };
-    })(this)).on("visit", (function(_this) {
-      return function(e) {
-        _this.controllers.city.listView.hide();
-        _this.controllers.county.listView.hide();
-        return _this.popover.setActive(true);
       };
     })(this));
-    this.controllers.city.on("afterSelect", (function(_this) {
-      return function(e, city, init) {
-        var codes;
-        if (!init) {
-          _this.setInfoBarActive(true);
+    this.cityField.on("active", (function(_this) {
+      return function(e, item) {
+        _this._hideAllExcpet("city");
+        if (item) {
+          _this.cityList.setCurrent(item).show();
         }
-        codes = city.current.counties;
-        if (!init) {
-          _this.controllers.county.reset();
-        }
-        return _this.controllers.county.setCodes(codes).render();
-      };
-    })(this)).on("visit", (function(_this) {
-      return function(e) {
-        _this.controllers.province.listView.hide();
-        _this.controllers.county.listView.hide();
         return _this.popover.setActive(true);
       };
+    })(this)).on("restore", (function(_this) {
+      return function() {
+        return _this.cityList.setCodes(_this.provinceField.getItem().cities).render();
+      };
     })(this));
-    return this.controllers.county.on("afterSelect", (function(_this) {
-      return function(e, county, init) {
-        if (!init) {
-          _this.setInfoBarActive(true);
+    this.cityList.on("afterSelect", (function(_this) {
+      return function(e, city) {
+        _this.fieldGroup.setEmpty(false);
+        _this.cityField.setItem(city);
+        _this.countyList.setCodes(city.counties).render();
+        return _this.countyField.clear().setActive(true, true);
+      };
+    })(this));
+    this.countyField.on("active", (function(_this) {
+      return function(e, item) {
+        _this._hideAllExcpet("county");
+        if (item) {
+          _this.countyList.setCurrent(item).show();
         }
+        return _this.popover.setActive(true);
+      };
+    })(this)).on("restore", (function(_this) {
+      return function() {
+        return _this.countyList.setCodes(_this.cityField.getItem().counties).render();
+      };
+    })(this));
+    return this.countyList.on("afterSelect", (function(_this) {
+      return function(e, county) {
+        _this.fieldGroup.setEmpty(false);
+        _this.countyField.setItem(county).highlight(false);
         return _this.popover.setActive(false);
-      };
-    })(this)).on("visit", (function(_this) {
-      return function(e) {
-        _this.controllers.province.listView.hide();
-        _this.controllers.city.listView.hide();
-        return _this.popover.setActive(true);
       };
     })(this));
   };
 
+  QingDistrict.prototype._restore = function() {
+    this.provinceField.restore();
+    this.cityField.restore();
+    if (this._isMunicipality(this.provinceField.getItem(), this.cityField.getItem())) {
+      this.cityField.setActive(false);
+    }
+    this.countyField.restore();
+    if (this.isFullFilled()) {
+      return this.fieldGroup.setEmpty(false);
+    }
+  };
+
+  QingDistrict.prototype._isMunicipality = function(province, city) {
+    if (!(province && city)) {
+      return false;
+    }
+    return province.cities.length === 1 && city.name === province.name;
+  };
+
+  QingDistrict.prototype._hideAllExcpet = function(type) {
+    var _type, i, len, ref, results;
+    ref = ["province", "city", "county"];
+    results = [];
+    for (i = 0, len = ref.length; i < len; i++) {
+      _type = ref[i];
+      if (_type !== type) {
+        this[_type + "List"].hide();
+        results.push(this[_type + "Field"].highlight(false));
+      } else {
+        results.push(void 0);
+      }
+    }
+    return results;
+  };
+
+  QingDistrict.prototype.isFullFilled = function() {
+    return this.provinceField.isFilled() && this.cityField.isFilled() && this.countyField.isFilled();
+  };
+
   QingDistrict.prototype.destroy = function() {
-    return this.el.empty().removeData('qingDistrict');
+    this.popover.destroy();
+    this.wrapper.remove();
+    return this.el.removeClass("qing-district").removeData('qingDistrict');
   };
 
   return QingDistrict;
@@ -533,7 +593,7 @@ QingDistrict = (function(superClass) {
 
 module.exports = QingDistrict;
 
-},{"./controller.coffee":1,"./data-store.coffee":2,"./view/popover.coffee":4}]},{},[]);
+},{"./data-store.coffee":1,"./field-proxy-group.coffee":2,"./field-proxy.coffee":3,"./list.coffee":4,"./popover.coffee":5}]},{},[]);
 
 return b('qing-district');
 }));

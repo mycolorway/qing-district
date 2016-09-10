@@ -1,9 +1,9 @@
-class DataStore
-  constructor: (rawData) ->
-    @data = @formatData(rawData)
+class DataStore extends QingModule
 
-  findByType: (type) ->
-    @data[type]
+  load: (dataSource) ->
+    dataSource.call null, (data) =>
+      @data = @formatData(data)
+      @trigger "loaded", [@data]
 
   formatData: (data) ->
     return unless $.isArray data

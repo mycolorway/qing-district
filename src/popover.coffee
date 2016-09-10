@@ -14,6 +14,7 @@ class Popover extends QingModule
     if active then @_show() else @_hide()
 
   _show: ->
+    return if @el.is(":visible")
     @el.show()
     $(document).off('click.qing-district').on 'click.qing-district', (e) =>
       $target = $(e.target)
@@ -23,8 +24,13 @@ class Popover extends QingModule
     @trigger "show"
 
   _hide: ->
+    return unless @el.is(":visible")
     $(document).off('.qing-district')
     @el.hide()
     @trigger "hide"
+
+  destroy: ->
+    $(document).off('.qing-district')
+    @el.remove()
 
 module.exports = Popover

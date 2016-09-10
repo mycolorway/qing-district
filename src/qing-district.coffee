@@ -1,6 +1,8 @@
 DataStore = require "./data-store.coffee"
-Popover = require "./view/popover.coffee"
-Controller = require "./controller.coffee"
+Popover = require "./popover.coffee"
+FieldProxy = require "./field-proxy.coffee"
+FieldProxyGroup = require "./field-proxy-group.coffee"
+List = require "./list.coffee"
 
 class QingDistrict extends QingModule
 
@@ -8,17 +10,8 @@ class QingDistrict extends QingModule
     el: null
     dataSource: null
 
-  @_tpl: '''
-    <div class="qing-district-wrapper">
-      <div class="district-info empty">
-        <span class="placeholder">点击选择城市</span>
-      </div>
-    </div>
-  '''
-
   constructor: (opts) ->
-    super
-    @opts = $.extend {}, QingDistrict.opts, @opts
+    super $.extend {}, QingDistrict.opts, opts
     @el = $ @opts.el
 
     unless @el.length > 0
@@ -26,120 +19,146 @@ class QingDistrict extends QingModule
     unless $.isFunction(@opts.dataSource)
       throw new Error 'QingDistrict: option dataSource is required'
 
-    @_render()
+    if initialized = @el.data("qingDistrict")
+      return initialized
+
+    @dataStore = new DataStore()
+    @dataStore.on "loaded", (e, data) =>
+      @_render()
+      @_init(data)
+      @_bind()
+      @_restore()
+      @trigger 'ready'
+    @dataStore.load @opts.dataSource
+
+  _render: ->
+    @wrapper = $("""
+      <div class="qing-district-wrapper"></div>
+    """).data('district', @).prependTo @el
+    @el.addClass ' qing-district'
+      .data 'qingDistrict', @
+
+  _init: (data) ->
     @popover = new Popover
       target: @el
       wrapper: @wrapper
 
-    @opts.dataSource.call null, (data) =>
-      @dataStore = new DataStore(data)
+    @provinceList = new List
+      wrapper: @popover.el,
+      data: data.province,
+      codes: "all"
+    @cityList = new List
+      wrapper: @popover.el,
+      data: data.city,
+    @countyList = new List
+      wrapper: @popover.el,
+      data: data.county,
 
-      @register new Controller(
-        target: @el,
-        dataStore: @dataStore,
-        type: "province",
-        codes: "all"
-      )
-      @register new Controller(
-        target: @el,
-        dataStore: @dataStore,
-        type: "city"
-      )
-      @register new Controller(
-        target: @el,
-        dataStore: @dataStore,
-        type: "county"
-      )
+    @fieldGroup = new FieldProxyGroup
+      wrapper: @wrapper
 
-      @_bind()
-
-      for type in ["province", "city", "county"]
-        controller = @controllers[type]
-        if controller.isSelected()
-          controller.trigger "afterSelect", [controller, true]
-
-      @setInfoBarActive(true) if @isFullFilled()
-
-      @trigger 'ready'
-
-  isFullFilled: ->
-    for type in ["province", "city", "county"]
-      return false unless @controllers[type].isSelected()
-    true
-
-  register: (controller) ->
-    @el.find(".district-info").append controller.ref.el
-    @popover.el.append controller.listView.el
-    @controllers ||= {}
-    @controllers[controller.type] = controller
-
-  setInfoBarActive: (active) ->
-    @wrapper.find('.district-info').toggleClass "empty", !active
-
-  _render: ->
-    @wrapper = $(QingDistrict._tpl).data('district', @).prependTo @el
-    @el.addClass ' qing-district'
-      .data 'qingDistrict', @
+    @provinceField = new FieldProxy
+      group: @fieldGroup,
+      data: data.province
+      field: @el.find("[data-province-field]")
+    @cityField = new FieldProxy
+      group: @fieldGroup,
+      data: data.city,
+      field: @el.find("[data-city-field]")
+    @countyField = new FieldProxy
+      group: @fieldGroup,
+      data: data.county,
+      field: @el.find("[data-county-field]")
 
   _bind: ->
-    @wrapper
-      .on 'click', '.district-info', =>
-        if @wrapper.hasClass 'active'
-          @popover.setActive(false)
-        else
-          @controllers.province.render()
-          @popover.setActive(true)
+    @fieldGroup.on "emptySelect", =>
+      @cityList.hide()
+      @countyList.hide()
+      @provinceList.render()
+      @popover.setActive(true)
 
     @popover
       .on "show", ->
         @wrapper.addClass "active"
       .on "hide", =>
         @wrapper.removeClass "active"
+        @_hideAllExcpet("none")
         unless @isFullFilled()
-          for type, controller of @controllers
-            controller.reset()
-            @setInfoBarActive(false)
+          @provinceList.setCurrent(null)
+          @provinceField.clear()
+          @cityField.clear()
+          @countyField.clear()
+          @fieldGroup.setEmpty(true)
 
-    @controllers.province
-      .on "afterSelect", (e, province, init) =>
-        @setInfoBarActive(true) unless init
-        codes = province.current.cities
-        city = @controllers.city
-        if codes.length == 1 &&
-            city.dataMap[codes[0]].name == province.current.name
-          city.reset().selectByCode(codes[0]).ref.el.hide()
-          city.trigger "afterSelect", city unless init
-        else
-          city.reset() unless init
-          city.setCodes(codes).render()
-        @controllers.county.reset() unless init
-      .on "visit", (e) =>
-        @controllers.city.listView.hide()
-        @controllers.county.listView.hide()
-        @popover.setActive(true)
+    @provinceField.on "active", (e, item) =>
+      @_hideAllExcpet("province")
+      @provinceList.setCurrent(item).show() if item
+      @popover.setActive(true)
+    @provinceList.on "afterSelect", (e, province) =>
+      @fieldGroup.setEmpty(false)
+      @provinceField.setItem province
+      firstCity = @cityList.data[province.cities[0]]
+      if @_isMunicipality(province, firstCity)
+        @cityList.setCurrent(firstCity).hide()
+        @cityList.trigger "afterSelect", @cityList.current
+        @cityField.setActive(false)
+      else
+        @cityList.setCodes(province.cities).render()
+        @cityField.clear().setActive(true)
+        @countyField.clear()
 
-    @controllers.city
-      .on "afterSelect", (e, city, init) =>
-        @setInfoBarActive(true) unless init
-        codes = city.current.counties
-        @controllers.county.reset() unless init
-        @controllers.county.setCodes(codes).render()
-      .on "visit", (e) =>
-        @controllers.province.listView.hide()
-        @controllers.county.listView.hide()
+    @cityField
+      .on "active", (e, item) =>
+        @_hideAllExcpet("city")
+        @cityList.setCurrent(item).show() if item
         @popover.setActive true
+      .on "restore", =>
+        @cityList.setCodes(@provinceField.getItem().cities).render()
+    @cityList.on "afterSelect", (e, city) =>
+      @fieldGroup.setEmpty(false)
+      @cityField.setItem(city)
+      @countyList.setCodes(city.counties).render()
+      @countyField.clear().setActive(true, true)
 
-    @controllers.county
-      .on "afterSelect", (e, county, init) =>
-        @setInfoBarActive(true) unless init
-        @popover.setActive(false)
-      .on "visit", (e) =>
-        @controllers.province.listView.hide()
-        @controllers.city.listView.hide()
+    @countyField
+      .on "active", (e, item) =>
+        @_hideAllExcpet("county")
+        @countyList.setCurrent(item).show() if item
         @popover.setActive true
+      .on "restore", =>
+        @countyList.setCodes(@cityField.getItem().counties).render()
+    @countyList.on "afterSelect", (e, county) =>
+      @fieldGroup.setEmpty(false)
+      @countyField.setItem(county).highlight(false)
+      @popover.setActive(false)
+
+  _restore: ->
+    @provinceField.restore()
+    @cityField.restore()
+    if @_isMunicipality(@provinceField.getItem(), @cityField.getItem())
+      @cityField.setActive(false)
+    @countyField.restore()
+    @fieldGroup.setEmpty(false) if @isFullFilled()
+
+  _isMunicipality: (province, city) ->
+    return false unless province and city
+    province.cities.length == 1 && city.name == province.name
+
+  _hideAllExcpet: (type) ->
+    for _type in ["province", "city", "county"]
+      if _type != type
+        @["#{_type}List"].hide()
+        @["#{_type}Field"].highlight(false)
+
+  isFullFilled: ->
+    @provinceField.isFilled() &&
+    @cityField.isFilled() &&
+    @countyField.isFilled()
 
   destroy: ->
-    @el.empty()
+    @popover.destroy()
+    @wrapper.remove()
+    @el.removeClass "qing-district"
       .removeData 'qingDistrict'
 
 module.exports = QingDistrict
