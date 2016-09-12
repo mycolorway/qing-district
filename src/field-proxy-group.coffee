@@ -1,12 +1,13 @@
 class FieldProxyGroup extends QingModule
   opts:
     wrapper: null
+    placeholder: null
 
   constructor: ->
     super
     @el = $("""
       <div class="district-field-proxy-group">
-        <span class="placeholder">点击选择城市</span>
+        <span class="placeholder">#{@opts.placeholder}</span>
       </div>
     """).appendTo @opts.wrapper
     @_bind()

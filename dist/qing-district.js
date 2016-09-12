@@ -94,12 +94,13 @@ FieldProxyGroup = (function(superClass) {
   extend(FieldProxyGroup, superClass);
 
   FieldProxyGroup.prototype.opts = {
-    wrapper: null
+    wrapper: null,
+    placeholder: null
   };
 
   function FieldProxyGroup() {
     FieldProxyGroup.__super__.constructor.apply(this, arguments);
-    this.el = $("<div class=\"district-field-proxy-group\">\n  <span class=\"placeholder\">点击选择城市</span>\n</div>").appendTo(this.opts.wrapper);
+    this.el = $("<div class=\"district-field-proxy-group\">\n  <span class=\"placeholder\">" + this.opts.placeholder + "</span>\n</div>").appendTo(this.opts.wrapper);
     this._bind();
     this.setEmpty(true);
   }
@@ -373,22 +374,27 @@ QingDistrict = (function(superClass) {
 
   QingDistrict.opts = {
     el: null,
-    dataSource: null
+    dataSource: null,
+    locales: {
+      placeholder: "Click to select"
+    }
   };
 
   function QingDistrict(opts) {
     var initialized;
-    QingDistrict.__super__.constructor.call(this, $.extend({}, QingDistrict.opts, opts));
+    QingDistrict.__super__.constructor.apply(this, arguments);
     this.el = $(this.opts.el);
-    if (initialized = this.el.data("qingDistrict")) {
-      return initialized;
-    }
     if (!(this.el.length > 0)) {
       throw new Error('QingDistrict: option el is required');
+    }
+    if (initialized = this.el.data("qingDistrict")) {
+      return initialized;
     }
     if (!$.isFunction(this.opts.dataSource)) {
       throw new Error('QingDistrict: option dataSource is required');
     }
+    $.extend(this.opts, QingDistrict.opts, opts);
+    this.locales = this.opts.locales || QingDistrict.locales;
     this.dataStore = new DataStore();
     this.dataStore.on("loaded", (function(_this) {
       return function(e, data) {
@@ -426,7 +432,8 @@ QingDistrict = (function(superClass) {
       data: data.county
     });
     this.fieldGroup = new FieldProxyGroup({
-      wrapper: this.wrapper
+      wrapper: this.wrapper,
+      placeholder: this.locales.placeholder
     });
     this.provinceField = new FieldProxy({
       group: this.fieldGroup,

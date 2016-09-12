@@ -9,18 +9,24 @@ class QingDistrict extends QingModule
   @opts:
     el: null
     dataSource: null
+    locales:
+      placeholder: "Click to select"
 
   constructor: (opts) ->
-    super $.extend {}, QingDistrict.opts, opts
+    super
     @el = $ @opts.el
+
+    unless @el.length > 0
+      throw new Error 'QingDistrict: option el is required'
 
     if initialized = @el.data("qingDistrict")
       return initialized
 
-    unless @el.length > 0
-      throw new Error 'QingDistrict: option el is required'
     unless $.isFunction(@opts.dataSource)
       throw new Error 'QingDistrict: option dataSource is required'
+
+    $.extend @opts, QingDistrict.opts, opts
+    @locales = @opts.locales || QingDistrict.locales
 
     @dataStore = new DataStore()
     @dataStore.on "loaded", (e, data) =>
@@ -56,6 +62,7 @@ class QingDistrict extends QingModule
 
     @fieldGroup = new FieldProxyGroup
       wrapper: @wrapper
+      placeholder: @locales.placeholder
 
     @provinceField = new FieldProxy
       group: @fieldGroup,

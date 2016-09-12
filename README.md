@@ -49,6 +49,20 @@ __el__
 
 Selector/Element/jQuery Object, required, specify the html element.
 
+__dataSource__
+
+Function; required; should accept an callback to load data
+
+__locales__
+
+Hash, specify locale config, default config is:
+
+```
+{
+  placeholader: 'Click to select'
+}
+```
+
 ## Methods
 
 __destroy__ ()
