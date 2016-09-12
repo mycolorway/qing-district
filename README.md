@@ -15,12 +15,27 @@ QingDistrict is a ui component inherited from QingModule.
 <script type="text/javascript" src="node_modules/qing-module/dist/qing-module.js"></script>
 <script type="text/javascript" src="node_modules/qing-district/dist/qing-district.js"></script>
 
-<div class="qing-district"></div>
+<div class="your-element">
+    <input type="hidden" name="province" data-province-field value="110000" />
+    <input type="hidden" name="city" data-city-field value ="110100" />
+    <input type="hidden" name="county" data-county-field value= "110105" />
+</div>
 ```
+
+QingDistrict will set and get value from `data-[type]-field` elements, there are required.
 
 ```js
 var qingDistrict = new QingDistrict({
-  el: '.qing-district'
+  el: '.your-element',
+  dataSource: function (callback) {
+    callback([
+        {name: "one", code: "123456", cities: [
+            name: "city one", code: "city-12345", counties: [{}]
+        ]},
+        {name: "two", code: "45678", cities: [
+        ]}
+    ])
+  }
 });
 
 qingDistrict.on('ready', function(e) {
@@ -95,7 +110,7 @@ Now you can run `gulp publish` task, which will do these work for you:
 * Get version number from `CHANGELOG.md` and bump it into `package.json` and `bower.json`.
 * Get release information from `CHANGELOG.md` and request Github API to create new release.
 
-If everything goes fine, you can see your release at [https://github.com/mycolorway/qing-module/releases](https://github.com/mycolorway/qing-module/releases). At the End you can publish new version to npm with the command:
+If everything goes fine, you can see your release at [https://github.com/mycolorway/qing-district/releases](https://github.com/mycolorway/qing-district/releases). At the End you can publish new version to npm with the command:
 
 ```bash
 npm publish
