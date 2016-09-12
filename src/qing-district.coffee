@@ -14,13 +14,13 @@ class QingDistrict extends QingModule
     super $.extend {}, QingDistrict.opts, opts
     @el = $ @opts.el
 
+    if initialized = @el.data("qingDistrict")
+      return initialized
+
     unless @el.length > 0
       throw new Error 'QingDistrict: option el is required'
     unless $.isFunction(@opts.dataSource)
       throw new Error 'QingDistrict: option dataSource is required'
-
-    if initialized = @el.data("qingDistrict")
-      return initialized
 
     @dataStore = new DataStore()
     @dataStore.on "loaded", (e, data) =>
@@ -78,7 +78,7 @@ class QingDistrict extends QingModule
       @popover.setActive(true)
 
     @popover
-      .on "show", ->
+      .on "show", =>
         @wrapper.addClass "active"
       .on "hide", =>
         @wrapper.removeClass "active"

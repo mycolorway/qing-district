@@ -46,9 +46,6 @@ class List extends QingModule
     @codes = codes
     @
 
-  isSelected: ->
-    !!@field.val()
-
   render: ->
     @codes = Object.keys(@data) if @codes == "all"
     return unless @codes

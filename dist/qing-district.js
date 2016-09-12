@@ -164,7 +164,7 @@ FieldProxy = (function(superClass) {
     this.el.text(this.el.text() || "_").toggle(active);
     this.highlight(active);
     if (active) {
-      this.trigger("active", this.el.data("item"));
+      this.trigger("active", this.getItem());
     }
     return this;
   };
@@ -258,10 +258,6 @@ List = (function(superClass) {
     return this;
   };
 
-  List.prototype.isSelected = function() {
-    return !!this.field.val();
-  };
-
   List.prototype.render = function() {
     var code, i, item, len, ref, ref1;
     if (this.codes === "all") {
@@ -305,7 +301,7 @@ Popover = (function(superClass) {
     Popover.__super__.constructor.apply(this, arguments);
     this.wrapper = $(this.opts.wrapper);
     this.target = $(this.opts.target);
-    this.el = $('<div class="district-popover"></div>').appendTo(this.wrapper);
+    this.el = $('<div class="district-popover"></div>').hide().appendTo(this.wrapper);
   }
 
   Popover.prototype.setActive = function(active) {
@@ -384,14 +380,14 @@ QingDistrict = (function(superClass) {
     var initialized;
     QingDistrict.__super__.constructor.call(this, $.extend({}, QingDistrict.opts, opts));
     this.el = $(this.opts.el);
+    if (initialized = this.el.data("qingDistrict")) {
+      return initialized;
+    }
     if (!(this.el.length > 0)) {
       throw new Error('QingDistrict: option el is required');
     }
     if (!$.isFunction(this.opts.dataSource)) {
       throw new Error('QingDistrict: option dataSource is required');
-    }
-    if (initialized = this.el.data("qingDistrict")) {
-      return initialized;
     }
     this.dataStore = new DataStore();
     this.dataStore.on("loaded", (function(_this) {
@@ -458,9 +454,11 @@ QingDistrict = (function(superClass) {
         return _this.popover.setActive(true);
       };
     })(this));
-    this.popover.on("show", function() {
-      return this.wrapper.addClass("active");
-    }).on("hide", (function(_this) {
+    this.popover.on("show", (function(_this) {
+      return function() {
+        return _this.wrapper.addClass("active");
+      };
+    })(this)).on("hide", (function(_this) {
       return function() {
         _this.wrapper.removeClass("active");
         _this._hideAllExcpet("none");

@@ -8,7 +8,7 @@ class Popover extends QingModule
     super
     @wrapper = $ @opts.wrapper
     @target = $ @opts.target
-    @el = $('<div class="district-popover"></div>').appendTo @wrapper
+    @el = $('<div class="district-popover"></div>').hide().appendTo @wrapper
 
   setActive: (active) ->
     if active then @_show() else @_hide()

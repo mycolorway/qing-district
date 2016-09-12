@@ -25,7 +25,7 @@ class FieldProxy extends QingModule
   setActive: (active) ->
     @el.text(@el.text() || "_").toggle(active)
     @highlight(active)
-    @trigger "active", @el.data("item") if active
+    @trigger "active", @getItem() if active
     @
 
   highlight: (active) ->
