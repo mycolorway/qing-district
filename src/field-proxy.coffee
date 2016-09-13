@@ -13,6 +13,7 @@ class FieldProxy extends QingModule
       .appendTo @group.el
     @el.on "click", (e) =>
       @setActive(true)
+      false
 
   restore: ->
     if code = @field.val()
@@ -23,7 +24,7 @@ class FieldProxy extends QingModule
     !!@field.val()
 
   setActive: (active) ->
-    @el.text(@el.text() || "_").toggle(active)
+    @el.toggle(active)
     @highlight(active)
     @trigger "active", @getItem() if active
     @

@@ -61,7 +61,7 @@ describe 'QingDistrict', ->
       for type in ["province", "city", "county"]
         sinon.stub qingDistrict["#{type}Field"], "isFilled"
           .returns true
-      assert qingDistrict.isFullFilled()
+      assert qingDistrict._isFullFilled()
 
     it "is wrong", ->
       for type in ["province", "county"]
@@ -69,7 +69,7 @@ describe 'QingDistrict', ->
           .returns true
       sinon.stub qingDistrict.cityField, "isFilled"
         .returns false
-      assert.isNotOk qingDistrict.isFullFilled()
+      assert.isNotOk qingDistrict._isFullFilled()
 
   describe "_isMunicipality", ->
     it "is right", ->
@@ -95,7 +95,7 @@ describe 'QingDistrict', ->
 
     it "clear all fields if it's not full fielded", ->
       spies = []
-      sinon.stub(qingDistrict, 'isFullFilled').returns false
+      sinon.stub(qingDistrict, '_isFullFilled').returns false
       for type in ["province", "city", "county"]
         spies.push sinon.spy qingDistrict["#{type}Field"], "clear"
       qingDistrict.popover.trigger "hide"
@@ -136,13 +136,11 @@ describe 'QingDistrict', ->
 
     it "normal province", ->
       cityListSpy = sinon.spy qingDistrict.cityList, "render"
-      cityFieldActiveSpy = sinon.spy qingDistrict.cityField, "setActive"
       cityFieldClearSpy = sinon.spy qingDistrict.cityField, "clear"
       countyFieldClearSpy = sinon.spy qingDistrict.countyField, "clear"
 
       item = data.province["440000"]
       qingDistrict.provinceList.trigger "afterSelect", [item]
-      assert cityFieldActiveSpy.calledWith true
       assert cityListSpy.called
       assert cityFieldClearSpy.called
       assert countyFieldClearSpy.called

@@ -108,7 +108,8 @@ FieldProxyGroup = (function(superClass) {
   FieldProxyGroup.prototype._bind = function() {
     return this.el.on("click", ".placeholder", (function(_this) {
       return function() {
-        return _this.trigger("emptySelect");
+        _this.trigger("emptySelect");
+        return false;
       };
     })(this));
   };
@@ -144,7 +145,8 @@ FieldProxy = (function(superClass) {
     this.el = $('<a class="district-field-proxy" href="javascript:;"></a>').hide().appendTo(this.group.el);
     this.el.on("click", (function(_this) {
       return function(e) {
-        return _this.setActive(true);
+        _this.setActive(true);
+        return false;
       };
     })(this));
   }
@@ -162,7 +164,7 @@ FieldProxy = (function(superClass) {
   };
 
   FieldProxy.prototype.setActive = function(active) {
-    this.el.text(this.el.text() || "_").toggle(active);
+    this.el.toggle(active);
     this.highlight(active);
     if (active) {
       this.trigger("active", this.getItem());
@@ -272,7 +274,7 @@ List = (function(superClass) {
     for (i = 0, len = ref.length; i < len; i++) {
       code = ref[i];
       item = this.data[code];
-      $("<a title='" + item.name + "' data-code='" + item.code + "' href='javascript:;'>\n  " + item.name + "\n</a>").appendTo(this.el.find('dd'));
+      $("<a data-code='" + item.code + "' href='javascript:;'>\n  " + item.name + "\n</a>").appendTo(this.el.find('dd'));
     }
     this.highlightItem(this.data[(ref1 = this.current) != null ? ref1.code : void 0]);
     this.show();
@@ -344,6 +346,7 @@ Popover = (function(superClass) {
   };
 
   Popover.prototype.destroy = function() {
+    this.setActive(false);
     $(document).off('.qing-district');
     return this.el.remove();
   };
@@ -375,6 +378,7 @@ QingDistrict = (function(superClass) {
   QingDistrict.opts = {
     el: null,
     dataSource: null,
+    renderer: null,
     locales: {
       placeholder: "Click to select"
     }
@@ -402,6 +406,9 @@ QingDistrict = (function(superClass) {
         _this._init(data);
         _this._bind();
         _this._restore();
+        if ($.isFunction(_this.opts.renderer)) {
+          _this.opts.renderer.call(_this, _this.wrapper, _this);
+        }
         return _this.trigger('ready');
       };
     })(this));
@@ -465,6 +472,15 @@ QingDistrict = (function(superClass) {
         }
       };
     })(this));
+    this.fieldGroup.el.on("click", (function(_this) {
+      return function() {
+        if (_this.popover.el.is(":visible")) {
+          return _this.popover.setActive(false);
+        } else {
+          return _this.provinceField.setActive(true);
+        }
+      };
+    })(this));
     this.popover.on("show", (function(_this) {
       return function() {
         _this.wrapper.addClass("active");
@@ -475,7 +491,7 @@ QingDistrict = (function(superClass) {
         _this.wrapper.removeClass("active");
         _this.el.removeClass("active");
         _this._hideAllExcpet("none");
-        if (!_this.isFullFilled()) {
+        if (!_this._isFullFilled()) {
           _this.provinceList.setCurrent(null);
           _this.provinceField.clear();
           _this.cityField.clear();
@@ -497,7 +513,7 @@ QingDistrict = (function(superClass) {
       return function(e, province) {
         var firstCity;
         _this.fieldGroup.setEmpty(false);
-        _this.provinceField.setItem(province);
+        _this.provinceField.setItem(province).highlight(false);
         firstCity = _this.cityList.data[province.cities[0]];
         if (_this._isMunicipality(province, firstCity)) {
           _this.cityList.setCurrent(firstCity).hide();
@@ -505,7 +521,7 @@ QingDistrict = (function(superClass) {
           return _this.cityField.setActive(false);
         } else {
           _this.cityList.setCodes(province.cities).render();
-          _this.cityField.clear().setActive(true);
+          _this.cityField.clear();
           return _this.countyField.clear();
         }
       };
@@ -526,9 +542,9 @@ QingDistrict = (function(superClass) {
     this.cityList.on("afterSelect", (function(_this) {
       return function(e, city) {
         _this.fieldGroup.setEmpty(false);
-        _this.cityField.setItem(city);
+        _this.cityField.setItem(city).highlight(false);
         _this.countyList.setCodes(city.counties).render();
-        return _this.countyField.clear().setActive(true, true);
+        return _this.countyField.clear();
       };
     })(this));
     this.countyField.on("active", (function(_this) {
@@ -560,7 +576,7 @@ QingDistrict = (function(superClass) {
       this.cityField.setActive(false);
     }
     this.countyField.restore();
-    if (this.isFullFilled()) {
+    if (this._isFullAny()) {
       return this.fieldGroup.setEmpty(false);
     }
   };
@@ -588,8 +604,12 @@ QingDistrict = (function(superClass) {
     return results;
   };
 
-  QingDistrict.prototype.isFullFilled = function() {
+  QingDistrict.prototype._isFullFilled = function() {
     return this.provinceField.isFilled() && this.cityField.isFilled() && this.countyField.isFilled();
+  };
+
+  QingDistrict.prototype._isFullAny = function() {
+    return this.provinceField.isFilled() || this.cityField.isFilled() || this.countyField.isFilled();
   };
 
   QingDistrict.prototype.destroy = function() {

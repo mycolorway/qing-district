@@ -77,11 +77,6 @@ describe "FieldProxy", ->
 
   describe "setActive", ->
 
-    it "set placeholder", ->
-      field.el.text ""
-      field.setActive(true)
-      assert.equal "_", field.el.text()
-
     it "should be highlight", ->
       spy = sinon.spy field, "highlight"
       field.setActive true

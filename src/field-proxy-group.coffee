@@ -16,6 +16,7 @@ class FieldProxyGroup extends QingModule
   _bind: ->
     @el.on "click", ".placeholder", =>
       @trigger "emptySelect"
+      false
 
   setEmpty: (empty) ->
     @el.toggleClass "empty", empty

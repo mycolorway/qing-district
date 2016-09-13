@@ -9,6 +9,7 @@ class QingDistrict extends QingModule
   @opts:
     el: null
     dataSource: null
+    renderer: null
     locales:
       placeholder: "Click to select"
 
@@ -34,6 +35,8 @@ class QingDistrict extends QingModule
       @_init(data)
       @_bind()
       @_restore()
+      if $.isFunction @opts.renderer
+        @opts.renderer.call @, @wrapper, @
       @trigger 'ready'
     @dataStore.load @opts.dataSource
 
@@ -87,6 +90,12 @@ class QingDistrict extends QingModule
         @provinceList.render()
         @popover.setActive(true)
 
+    @fieldGroup.el.on "click", =>
+      if @popover.el.is(":visible")
+        @popover.setActive false
+      else
+        @provinceField.setActive(true)
+
     @popover
       .on "show", =>
         @wrapper.addClass "active"
@@ -95,7 +104,7 @@ class QingDistrict extends QingModule
         @wrapper.removeClass "active"
         @el.removeClass "active"
         @_hideAllExcpet("none")
-        unless @isFullFilled()
+        unless @_isFullFilled()
           @provinceList.setCurrent(null)
           @provinceField.clear()
           @cityField.clear()
@@ -108,7 +117,7 @@ class QingDistrict extends QingModule
       @popover.setActive(true)
     @provinceList.on "afterSelect", (e, province) =>
       @fieldGroup.setEmpty(false)
-      @provinceField.setItem province
+      @provinceField.setItem(province).highlight(false)
       firstCity = @cityList.data[province.cities[0]]
       if @_isMunicipality(province, firstCity)
         @cityList.setCurrent(firstCity).hide()
@@ -116,7 +125,7 @@ class QingDistrict extends QingModule
         @cityField.setActive(false)
       else
         @cityList.setCodes(province.cities).render()
-        @cityField.clear().setActive(true)
+        @cityField.clear()
         @countyField.clear()
 
     @cityField
@@ -128,9 +137,9 @@ class QingDistrict extends QingModule
         @cityList.setCodes(@provinceField.getItem().cities).render()
     @cityList.on "afterSelect", (e, city) =>
       @fieldGroup.setEmpty(false)
-      @cityField.setItem(city)
+      @cityField.setItem(city).highlight(false)
       @countyList.setCodes(city.counties).render()
-      @countyField.clear().setActive(true, true)
+      @countyField.clear()
 
     @countyField
       .on "active", (e, item) =>
@@ -150,7 +159,7 @@ class QingDistrict extends QingModule
     if @_isMunicipality(@provinceField.getItem(), @cityField.getItem())
       @cityField.setActive(false)
     @countyField.restore()
-    @fieldGroup.setEmpty(false) if @isFullFilled()
+    @fieldGroup.setEmpty(false) if @_isFullAny()
 
   _isMunicipality: (province, city) ->
     return false unless province and city
@@ -162,9 +171,14 @@ class QingDistrict extends QingModule
         @["#{_type}List"].hide()
         @["#{_type}Field"].highlight(false)
 
-  isFullFilled: ->
+  _isFullFilled: ->
     @provinceField.isFilled() &&
     @cityField.isFilled() &&
+    @countyField.isFilled()
+
+  _isFullAny: ->
+    @provinceField.isFilled() ||
+    @cityField.isFilled() ||
     @countyField.isFilled()
 
   destroy: ->

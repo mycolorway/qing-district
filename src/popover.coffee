@@ -30,6 +30,7 @@ class Popover extends QingModule
     @trigger "hide"
 
   destroy: ->
+    @setActive(false)
     $(document).off('.qing-district')
     @el.remove()
 
