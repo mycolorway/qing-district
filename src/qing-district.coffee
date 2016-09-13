@@ -79,16 +79,21 @@ class QingDistrict extends QingModule
 
   _bind: ->
     @fieldGroup.on "emptySelect", =>
-      @cityList.hide()
-      @countyList.hide()
-      @provinceList.render()
-      @popover.setActive(true)
+      if @popover.el.is(":visible")
+        @popover.setActive(false)
+      else
+        @cityList.hide()
+        @countyList.hide()
+        @provinceList.render()
+        @popover.setActive(true)
 
     @popover
       .on "show", =>
         @wrapper.addClass "active"
+        @el.addClass "active"
       .on "hide", =>
         @wrapper.removeClass "active"
+        @el.removeClass "active"
         @_hideAllExcpet("none")
         unless @isFullFilled()
           @provinceList.setCurrent(null)

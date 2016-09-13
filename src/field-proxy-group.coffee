@@ -7,7 +7,7 @@ class FieldProxyGroup extends QingModule
     super
     @el = $("""
       <div class="district-field-proxy-group">
-        <span class="placeholder">#{@opts.placeholder}</span>
+        <a class="placeholder">#{@opts.placeholder}</a>
       </div>
     """).appendTo @opts.wrapper
     @_bind()

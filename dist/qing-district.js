@@ -6,7 +6,7 @@
  * Released under the MIT license
  * http://mycolorway.github.io/qing-district/license.html
  *
- * Date: 2016-09-12
+ * Date: 2016-09-13
  */
 ;(function(root, factory) {
   if (typeof module === 'object' && module.exports) {
@@ -100,7 +100,7 @@ FieldProxyGroup = (function(superClass) {
 
   function FieldProxyGroup() {
     FieldProxyGroup.__super__.constructor.apply(this, arguments);
-    this.el = $("<div class=\"district-field-proxy-group\">\n  <span class=\"placeholder\">" + this.opts.placeholder + "</span>\n</div>").appendTo(this.opts.wrapper);
+    this.el = $("<div class=\"district-field-proxy-group\">\n  <a class=\"placeholder\">" + this.opts.placeholder + "</a>\n</div>").appendTo(this.opts.wrapper);
     this._bind();
     this.setEmpty(true);
   }
@@ -455,19 +455,25 @@ QingDistrict = (function(superClass) {
   QingDistrict.prototype._bind = function() {
     this.fieldGroup.on("emptySelect", (function(_this) {
       return function() {
-        _this.cityList.hide();
-        _this.countyList.hide();
-        _this.provinceList.render();
-        return _this.popover.setActive(true);
+        if (_this.popover.el.is(":visible")) {
+          return _this.popover.setActive(false);
+        } else {
+          _this.cityList.hide();
+          _this.countyList.hide();
+          _this.provinceList.render();
+          return _this.popover.setActive(true);
+        }
       };
     })(this));
     this.popover.on("show", (function(_this) {
       return function() {
-        return _this.wrapper.addClass("active");
+        _this.wrapper.addClass("active");
+        return _this.el.addClass("active");
       };
     })(this)).on("hide", (function(_this) {
       return function() {
         _this.wrapper.removeClass("active");
+        _this.el.removeClass("active");
         _this._hideAllExcpet("none");
         if (!_this.isFullFilled()) {
           _this.provinceList.setCurrent(null);

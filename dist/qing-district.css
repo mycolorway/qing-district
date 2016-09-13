@@ -6,15 +6,22 @@
  * Released under the MIT license
  * http://mycolorway.github.io/qing-district/license.html
  *
- * Date: 2016-09-12
+ * Date: 2016-09-13
  */
 .qing-district {
   position: relative;
-  width: 300px; }
+  width: 300px;
+  border-radius: 2px;
+  border: 1px solid #DFDFDF;
+  font-size: 16px;
+  height: 40px; }
   .qing-district a {
+    cursor: default;
     text-decoration: none; }
   .qing-district .district-field-proxy-group {
-    width: 100%; }
+    width: 100%;
+    padding: 5px;
+    font-size: 0; }
     .qing-district .district-field-proxy-group.empty {
       cursor: pointer; }
       .qing-district .district-field-proxy-group.empty .placeholder {
@@ -24,13 +31,14 @@
       display: inline-block;
       padding: 3px;
       color: #333333;
-      border-radius: 2px; }
+      border-radius: 2px;
+      margin: 0 1px;
+      line-height: 1.5;
+      vertical-align: middle;
+      font-size: 16px; }
       .qing-district .district-field-proxy-group .district-field-proxy.active, .qing-district .district-field-proxy-group .placeholder.active {
-        color: #fff;
-        background-color: #8FB7E6;
+        background-color: #f6f6f6;
         border-radius: 2px; }
-        .qing-district .district-field-proxy-group .district-field-proxy.active:hover, .qing-district .district-field-proxy-group .placeholder.active:hover {
-          background-color: #8FB7E6; }
       .qing-district .district-field-proxy-group .district-field-proxy:hover, .qing-district .district-field-proxy-group .placeholder:hover {
         background-color: #efefef;
         text-decoration: none; }
@@ -38,36 +46,30 @@
       display: none; }
   .qing-district .district-popover {
     position: absolute;
-    top: 30px;
+    box-shadow: 0 0 6px 0 rgba(0, 0, 0, 0.15);
+    top: 48px;
     left: 0;
     width: 100%;
     display: none;
     padding: 15px;
-    border: 1px solid #ccc;
     box-sizing: border-box;
     background: #ffffff;
     z-index: 10;
-    box-shadow: 0 4px 4px rgba(0, 0, 0, 0.2); }
+    border: 1px solid #DDDDDD;
+    border-radius: 2px;
+    box-shadow: 0 0 6px 0 rgba(0, 0, 0, 0.15); }
     .qing-district .district-popover dl {
       margin: 0 0 10px 0; }
       .qing-district .district-popover dl:last-child {
         margin: 0; }
-      .qing-district .district-popover dl dt {
-        width: 50px;
-        float: left;
-        line-height: 24px;
-        font-family: monospace;
-        color: #999999; }
       .qing-district .district-popover dl dd {
         margin: 0;
         white-space: normal; }
         .qing-district .district-popover dl dd a {
           display: inline-block;
-          padding: 6px 10px;
+          padding: 12px;
           color: #333333;
-          line-height: 24px;
-          font-size: 14px; }
-          .qing-district .district-popover dl dd a.active {
-            color: #fff;
-            background-color: #8FB7E6;
-            border-radius: 2px; }
+          font-size: 14px;
+          border-radius: 2px; }
+          .qing-district .district-popover dl dd a:hover {
+            background: #f6f6f6; }
