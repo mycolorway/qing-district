@@ -53,7 +53,7 @@ class List extends QingModule
     for code in @codes
       item = @data[code]
       $("""
-        <a data-code='#{item.code}' href='javascript:;'>
+        <a data-code='#{item.code}' tabindex='-1' href='javascript:;'>
           #{item.name}
         </a>
       """).appendTo @el.find('dd')

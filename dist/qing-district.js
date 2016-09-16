@@ -6,7 +6,7 @@
  * Released under the MIT license
  * http://mycolorway.github.io/qing-district/license.html
  *
- * Date: 2016-09-13
+ * Date: 2016-09-16
  */
 ;(function(root, factory) {
   if (typeof module === 'object' && module.exports) {
@@ -148,6 +148,12 @@ FieldProxy = (function(superClass) {
         _this.setActive(true);
         return false;
       };
+    })(this)).on("keydown", (function(_this) {
+      return function(e) {
+        if ($(e.target).is(_this.el) && e.which === 13) {
+          return _this.setActive(true);
+        }
+      };
     })(this));
   }
 
@@ -173,6 +179,7 @@ FieldProxy = (function(superClass) {
   };
 
   FieldProxy.prototype.highlight = function(active) {
+    this.el.attr("tabindex", (active ? -1 : 0));
     return this.el.toggleClass("active", active);
   };
 
@@ -274,7 +281,7 @@ List = (function(superClass) {
     for (i = 0, len = ref.length; i < len; i++) {
       code = ref[i];
       item = this.data[code];
-      $("<a data-code='" + item.code + "' href='javascript:;'>\n  " + item.name + "\n</a>").appendTo(this.el.find('dd'));
+      $("<a data-code='" + item.code + "' tabindex='-1' href='javascript:;'>\n  " + item.name + "\n</a>").appendTo(this.el.find('dd'));
     }
     this.highlightItem(this.data[(ref1 = this.current) != null ? ref1.code : void 0]);
     this.show();
@@ -305,6 +312,13 @@ Popover = (function(superClass) {
     this.wrapper = $(this.opts.wrapper);
     this.target = $(this.opts.target);
     this.el = $('<div class="district-popover"></div>').hide().appendTo(this.wrapper);
+    this.el.on("keydown", (function(_this) {
+      return function(e) {
+        if (e.which === 27) {
+          return _this.setActive(false);
+        }
+      };
+    })(this));
   }
 
   Popover.prototype.setActive = function(active) {
@@ -375,6 +389,8 @@ List = require("./list.coffee");
 QingDistrict = (function(superClass) {
   extend(QingDistrict, superClass);
 
+  QingDistrict.name = "QingDistrict";
+
   QingDistrict.opts = {
     el: null,
     dataSource: null,
@@ -399,6 +415,7 @@ QingDistrict = (function(superClass) {
     }
     $.extend(this.opts, QingDistrict.opts, opts);
     this.locales = this.opts.locales || QingDistrict.locales;
+    this.el.attr('tabindex', 0);
     this.dataStore = new DataStore();
     this.dataStore.on("loaded", (function(_this) {
       return function(e, data) {
@@ -460,6 +477,20 @@ QingDistrict = (function(superClass) {
   };
 
   QingDistrict.prototype._bind = function() {
+    this.el.on("keydown", (function(_this) {
+      return function(e) {
+        if (!$(e.target).is(_this.el)) {
+          return;
+        }
+        switch (e.which) {
+          case 13:
+          case 40:
+            return _this.fieldGroup.el.trigger("click");
+          case 27:
+            return _this.popover.setActive(false);
+        }
+      };
+    })(this));
     this.fieldGroup.on("emptySelect", (function(_this) {
       return function() {
         if (_this.popover.el.is(":visible")) {

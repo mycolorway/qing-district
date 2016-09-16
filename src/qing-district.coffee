@@ -6,6 +6,8 @@ List = require "./list.coffee"
 
 class QingDistrict extends QingModule
 
+  @name: "QingDistrict"
+
   @opts:
     el: null
     dataSource: null
@@ -28,6 +30,8 @@ class QingDistrict extends QingModule
 
     $.extend @opts, QingDistrict.opts, opts
     @locales = @opts.locales || QingDistrict.locales
+
+    @el.attr('tabindex', 0)
 
     @dataStore = new DataStore()
     @dataStore.on "loaded", (e, data) =>
@@ -81,6 +85,14 @@ class QingDistrict extends QingModule
       field: @el.find("[data-county-field]")
 
   _bind: ->
+    @el.on "keydown", (e) =>
+      return unless $(e.target).is(@el)
+      switch e.which
+        when 13, 40
+          @fieldGroup.el.trigger "click"
+        when 27
+          @popover.setActive(false)
+
     @fieldGroup.on "emptySelect", =>
       if @popover.el.is(":visible")
         @popover.setActive(false)

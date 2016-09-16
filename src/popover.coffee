@@ -9,6 +9,9 @@ class Popover extends QingModule
     @wrapper = $ @opts.wrapper
     @target = $ @opts.target
     @el = $('<div class="district-popover"></div>').hide().appendTo @wrapper
+    @el.on "keydown", (e) =>
+      if e.which == 27
+        @setActive(false)
 
   setActive: (active) ->
     if active then @_show() else @_hide()

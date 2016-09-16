@@ -11,9 +11,13 @@ class FieldProxy extends QingModule
 
     @el = $('<a class="district-field-proxy" href="javascript:;"></a>').hide()
       .appendTo @group.el
-    @el.on "click", (e) =>
-      @setActive(true)
-      false
+    @el
+      .on "click", (e) =>
+        @setActive(true)
+        false
+      .on "keydown", (e) =>
+        if $(e.target).is(@el) and e.which == 13
+          @setActive(true)
 
   restore: ->
     if code = @field.val()
@@ -30,6 +34,7 @@ class FieldProxy extends QingModule
     @
 
   highlight: (active) ->
+    @el.attr "tabindex", (if active then -1 else 0)
     @el.toggleClass "active", active
 
   getItem: ->
