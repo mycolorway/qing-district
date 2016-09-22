@@ -37,8 +37,7 @@ describe 'QingDistrict', ->
       el: '.test-el'
     instanceTwo = new QingDistrict
       el: '.test-el'
-    assert.equal qingDistrict, instanceOne
-    assert.equal qingDistrict, instanceTwo
+    assert.equal 1, QingDistrict.instanceCount
 
   it 'should throw error when element not found', ->
     spy = sinon.spy QingDistrict

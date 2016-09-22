@@ -5,8 +5,7 @@ class List extends QingModule
     data: null
     codes: []
 
-  constructor: ->
-    super
+  _init: ->
     { @wrapper, @data, @codes } = @opts
 
     @el = $("""

@@ -5,8 +5,7 @@ class FieldProxy extends QingModule
     data: null
     field: null
 
-  constructor: ->
-    super
+  _init: ->
     { @group, @data, @field } = @opts
 
     @el = $('<a class="district-field-proxy" href="javascript:;"></a>').hide()

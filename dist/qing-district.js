@@ -6,7 +6,7 @@
  * Released under the MIT license
  * http://mycolorway.github.io/qing-district/license.html
  *
- * Date: 2016-09-16
+ * Date: 2016-09-22
  */
 ;(function(root, factory) {
   if (typeof module === 'object' && module.exports) {
@@ -93,17 +93,20 @@ var FieldProxyGroup,
 FieldProxyGroup = (function(superClass) {
   extend(FieldProxyGroup, superClass);
 
+  function FieldProxyGroup() {
+    return FieldProxyGroup.__super__.constructor.apply(this, arguments);
+  }
+
   FieldProxyGroup.prototype.opts = {
     wrapper: null,
     placeholder: null
   };
 
-  function FieldProxyGroup() {
-    FieldProxyGroup.__super__.constructor.apply(this, arguments);
+  FieldProxyGroup.prototype._init = function() {
     this.el = $("<div class=\"district-field-proxy-group\">\n  <a class=\"placeholder\">" + this.opts.placeholder + "</a>\n</div>").appendTo(this.opts.wrapper);
     this._bind();
-    this.setEmpty(true);
-  }
+    return this.setEmpty(true);
+  };
 
   FieldProxyGroup.prototype._bind = function() {
     return this.el.on("click", ".placeholder", (function(_this) {
@@ -132,18 +135,21 @@ var FieldProxy,
 FieldProxy = (function(superClass) {
   extend(FieldProxy, superClass);
 
+  function FieldProxy() {
+    return FieldProxy.__super__.constructor.apply(this, arguments);
+  }
+
   FieldProxy.prototype.opts = {
     group: null,
     data: null,
     field: null
   };
 
-  function FieldProxy() {
+  FieldProxy.prototype._init = function() {
     var ref;
-    FieldProxy.__super__.constructor.apply(this, arguments);
     ref = this.opts, this.group = ref.group, this.data = ref.data, this.field = ref.field;
     this.el = $('<a class="district-field-proxy" href="javascript:;"></a>').hide().appendTo(this.group.el);
-    this.el.on("click", (function(_this) {
+    return this.el.on("click", (function(_this) {
       return function(e) {
         _this.setActive(true);
         return false;
@@ -155,7 +161,7 @@ FieldProxy = (function(superClass) {
         }
       };
     })(this));
-  }
+  };
 
   FieldProxy.prototype.restore = function() {
     var code, item;
@@ -213,20 +219,23 @@ var List,
 List = (function(superClass) {
   extend(List, superClass);
 
+  function List() {
+    return List.__super__.constructor.apply(this, arguments);
+  }
+
   List.prototype.opts = {
     wrapper: null,
     data: null,
     codes: []
   };
 
-  function List() {
+  List.prototype._init = function() {
     var ref;
-    List.__super__.constructor.apply(this, arguments);
     ref = this.opts, this.wrapper = ref.wrapper, this.data = ref.data, this.codes = ref.codes;
     this.el = $("<div class=\"district-list\">\n  <dl><dd></dd></dl>\n</div>").hide().appendTo(this.wrapper);
     this.render();
-    this._bind();
-  }
+    return this._bind();
+  };
 
   List.prototype.highlightItem = function(item) {
     this.el.find("a").removeClass("active");
@@ -302,24 +311,31 @@ var Popover,
 Popover = (function(superClass) {
   extend(Popover, superClass);
 
+  function Popover() {
+    return Popover.__super__.constructor.apply(this, arguments);
+  }
+
   Popover.prototype.opts = {
+    id: null,
     target: null,
     wrapper: null
   };
 
-  function Popover() {
-    Popover.__super__.constructor.apply(this, arguments);
+  Popover.instanceCount = 0;
+
+  Popover.prototype._init = function() {
     this.wrapper = $(this.opts.wrapper);
     this.target = $(this.opts.target);
     this.el = $('<div class="district-popover"></div>').hide().appendTo(this.wrapper);
-    this.el.on("keydown", (function(_this) {
+    this.id = ++Popover.instanceCount;
+    return this.el.on("keydown", (function(_this) {
       return function(e) {
         if (e.which === 27) {
           return _this.setActive(false);
         }
       };
     })(this));
-  }
+  };
 
   Popover.prototype.setActive = function(active) {
     if (active) {
@@ -334,7 +350,7 @@ Popover = (function(superClass) {
       return;
     }
     this.el.show();
-    $(document).off('click.qing-district').on('click.qing-district', (function(_this) {
+    $(document).off("click.qing-district-" + this.id).on("click.qing-district-" + this.id, (function(_this) {
       return function(e) {
         var $target;
         $target = $(e.target);
@@ -354,14 +370,14 @@ Popover = (function(superClass) {
     if (!this.el.is(":visible")) {
       return;
     }
-    $(document).off('.qing-district');
+    $(document).off(".qing-district-" + this.id);
     this.el.hide();
     return this.trigger("hide");
   };
 
   Popover.prototype.destroy = function() {
     this.setActive(false);
-    $(document).off('.qing-district');
+    $(document).off(".qing-district-" + this.id);
     return this.el.remove();
   };
 
@@ -389,6 +405,10 @@ List = require("./list.coffee");
 QingDistrict = (function(superClass) {
   extend(QingDistrict, superClass);
 
+  function QingDistrict() {
+    return QingDistrict.__super__.constructor.apply(this, arguments);
+  }
+
   QingDistrict.name = "QingDistrict";
 
   QingDistrict.opts = {
@@ -400,9 +420,16 @@ QingDistrict = (function(superClass) {
     }
   };
 
-  function QingDistrict(opts) {
+  QingDistrict.instanceCount = 0;
+
+  QingDistrict.prototype._setOptions = function(opts) {
+    QingDistrict.__super__._setOptions.apply(this, arguments);
+    return $.extend(this.opts, QingDistrict.opts, opts);
+  };
+
+  QingDistrict.prototype._init = function(opts) {
     var initialized;
-    QingDistrict.__super__.constructor.apply(this, arguments);
+    QingDistrict.__super__._init.apply(this, arguments);
     this.el = $(this.opts.el);
     if (!(this.el.length > 0)) {
       throw new Error('QingDistrict: option el is required');
@@ -413,14 +440,13 @@ QingDistrict = (function(superClass) {
     if (!$.isFunction(this.opts.dataSource)) {
       throw new Error('QingDistrict: option dataSource is required');
     }
-    $.extend(this.opts, QingDistrict.opts, opts);
-    this.locales = this.opts.locales || QingDistrict.locales;
-    this.el.attr('tabindex', 0);
+    this.locales = $.extend({}, QingDistrict.locales, this.opts.locales);
+    this.id = ++QingDistrict.instanceCount;
+    this._render();
     this.dataStore = new DataStore();
     this.dataStore.on("loaded", (function(_this) {
       return function(e, data) {
-        _this._render();
-        _this._init(data);
+        _this._setup(data);
         _this._bind();
         _this._restore();
         if ($.isFunction(_this.opts.renderer)) {
@@ -429,15 +455,15 @@ QingDistrict = (function(superClass) {
         return _this.trigger('ready');
       };
     })(this));
-    this.dataStore.load(this.opts.dataSource);
-  }
+    return this.dataStore.load(this.opts.dataSource);
+  };
 
   QingDistrict.prototype._render = function() {
     this.wrapper = $("<div class=\"qing-district-wrapper\"></div>").data('district', this).prependTo(this.el);
-    return this.el.addClass(' qing-district').data('qingDistrict', this);
+    return this.el.attr('tabindex', 0).addClass(' qing-district').data('qingDistrict', this);
   };
 
-  QingDistrict.prototype._init = function(data) {
+  QingDistrict.prototype._setup = function(data) {
     this.popover = new Popover({
       target: this.el,
       wrapper: this.wrapper

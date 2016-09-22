@@ -15,7 +15,13 @@ class QingDistrict extends QingModule
     locales:
       placeholder: "Click to select"
 
-  constructor: (opts) ->
+  @instanceCount: 0
+
+  _setOptions: (opts) ->
+    super
+    $.extend @opts, QingDistrict.opts, opts
+
+  _init: (opts) ->
     super
     @el = $ @opts.el
 
@@ -28,15 +34,13 @@ class QingDistrict extends QingModule
     unless $.isFunction(@opts.dataSource)
       throw new Error 'QingDistrict: option dataSource is required'
 
-    $.extend @opts, QingDistrict.opts, opts
-    @locales = @opts.locales || QingDistrict.locales
+    @locales = $.extend {}, QingDistrict.locales, @opts.locales
+    @id = ++ QingDistrict.instanceCount
 
-    @el.attr('tabindex', 0)
-
+    @_render()
     @dataStore = new DataStore()
     @dataStore.on "loaded", (e, data) =>
-      @_render()
-      @_init(data)
+      @_setup(data)
       @_bind()
       @_restore()
       if $.isFunction @opts.renderer
@@ -47,11 +51,14 @@ class QingDistrict extends QingModule
   _render: ->
     @wrapper = $("""
       <div class="qing-district-wrapper"></div>
-    """).data('district', @).prependTo @el
-    @el.addClass ' qing-district'
+    """).data('district', @)
+        .prependTo @el
+
+    @el.attr('tabindex', 0)
+      .addClass ' qing-district'
       .data 'qingDistrict', @
 
-  _init: (data) ->
+  _setup: (data) ->
     @popover = new Popover
       target: @el
       wrapper: @wrapper

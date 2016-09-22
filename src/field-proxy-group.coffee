@@ -1,10 +1,10 @@
 class FieldProxyGroup extends QingModule
+
   opts:
     wrapper: null
     placeholder: null
 
-  constructor: ->
-    super
+  _init: ->
     @el = $("""
       <div class="district-field-proxy-group">
         <a class="placeholder">#{@opts.placeholder}</a>

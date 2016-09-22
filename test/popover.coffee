@@ -33,14 +33,14 @@ describe 'Popover', ->
 
     it "off event", ->
       spy = sinon.spy()
-      $(document).on "test.qing-district", spy
+      $(document).on "test.qing-district-#{popover.id}", spy
 
-      $(document).trigger "test.qing-district"
+      $(document).trigger "test.qing-district-#{popover.id}"
       assert spy.called
 
       spy.reset()
       popover.destroy()
-      $(document).trigger "test.qing-district"
+      $(document).trigger "test.qing-district-#{popover.id}"
       assert.equal false, spy.called
 
   describe "setActive", ->
