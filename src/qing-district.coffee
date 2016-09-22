@@ -12,8 +12,9 @@ class QingDistrict extends QingModule
     el: null
     dataSource: null
     renderer: null
-    locales:
-      placeholder: "Click to select"
+
+  @locales:
+    placeholder: "Click to select"
 
   @instanceCount: 0
 

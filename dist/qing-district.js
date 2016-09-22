@@ -414,10 +414,11 @@ QingDistrict = (function(superClass) {
   QingDistrict.opts = {
     el: null,
     dataSource: null,
-    renderer: null,
-    locales: {
-      placeholder: "Click to select"
-    }
+    renderer: null
+  };
+
+  QingDistrict.locales = {
+    placeholder: "Click to select"
   };
 
   QingDistrict.instanceCount = 0;
