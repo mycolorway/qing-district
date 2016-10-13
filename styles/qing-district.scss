@@ -1,12 +1,13 @@
 
 .qing-district {
   position: relative;
-  width: 300px;
+  width: 340px;
   border-radius: 2px;
   border: 1px solid #DFDFDF;
   font-size: 16px;
   height: 40px;
   box-sizing: border-box;
+  background: white;
 
   &:hover {
     border-color: #ACC6E4;
