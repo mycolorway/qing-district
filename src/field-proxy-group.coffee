@@ -10,13 +10,10 @@ class FieldProxyGroup extends QingModule
         <a class="placeholder">#{@opts.placeholder}</a>
       </div>
     """).appendTo @opts.wrapper
-    @_bind()
     @setEmpty true
 
-  _bind: ->
-    @el.on "click", ".placeholder", =>
-      @trigger "emptySelect"
-      false
+  isEmpty: ->
+    @el.is ".empty"
 
   setEmpty: (empty) ->
     @el.toggleClass "empty", empty

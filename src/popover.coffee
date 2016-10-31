@@ -1,43 +1,58 @@
 class Popover extends QingModule
 
   opts:
-    id: null
     target: null
-    wrapper: null
+    appendTo: null
+    offset: null
 
   @instanceCount: 0
 
   _init: ->
-    @wrapper = $ @opts.wrapper
     @target = $ @opts.target
-    @el = $('<div class="district-popover"></div>').hide().appendTo @wrapper
+    @el = $('<div class="qing-district-popover"></div>')
+      .appendTo @opts.appendTo || @target
     @id = ++ Popover.instanceCount
-    @el.on "keydown", (e) =>
-      if e.which == 27
-        @setActive(false)
+    @active = false
+    @_bind()
+
+  _bind: ->
+    $(document).on "click.qing-district-popover-#{@id}", (e) =>
+      return if $(e.target).is(@el) ||
+        $.contains(@el[0], e.target) ||
+        $.contains(@target[0], e.target)
+      @setActive false
+      null
 
   setActive: (active) ->
-    if active then @_show() else @_hide()
+    return if active == @active
 
-  _show: ->
-    return if @el.is(":visible")
-    @el.show()
-    $(document).off("click.qing-district-#{@id}").on "click.qing-district-#{@id}", (e) =>
-      $target = $(e.target)
-      return unless @wrapper.hasClass('active')
-      return if @target.has($target).length or $target.is(@target)
-      @_hide()
-    @trigger "show"
+    if active
+      @el.addClass('active')
+        .appendTo @opts.appendTo
 
-  _hide: ->
-    return unless @el.is(":visible")
-    $(document).off(".qing-district-#{@id}")
-    @el.hide()
-    @trigger "hide"
+      @el.css width: @target.width()
+      @resetPosition()
+      @trigger 'show'
+    else
+      @el.removeClass('active')
+        .detach()
+      @trigger 'hide'
+
+    @active = active
+    @
+
+  resetPosition: ->
+    inputOffset = @target.offset()
+    wrapperOffset = @el.offsetParent().offset()
+    offsetTop = inputOffset.top - wrapperOffset.top
+    offsetLeft = inputOffset.left - wrapperOffset.left
+    @el.css
+      top: offsetTop + @target.outerHeight() + @opts.offset
+      left: offsetLeft || 0
 
   destroy: ->
     @setActive(false)
-    $(document).off(".qing-district-#{@id}")
+    $(document).off(".qing-district-popover-#{@id}")
     @el.remove()
 
 module.exports = Popover

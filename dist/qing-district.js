@@ -6,7 +6,7 @@
  * Released under the MIT license
  * http://mycolorway.github.io/qing-district/license.html
  *
- * Date: 2016-10-12
+ * Date: 2016-11-1
  */
 ;(function(root, factory) {
   if (typeof module === 'object' && module.exports) {
@@ -104,17 +104,11 @@ FieldProxyGroup = (function(superClass) {
 
   FieldProxyGroup.prototype._init = function() {
     this.el = $("<div class=\"district-field-proxy-group\">\n  <a class=\"placeholder\">" + this.opts.placeholder + "</a>\n</div>").appendTo(this.opts.wrapper);
-    this._bind();
     return this.setEmpty(true);
   };
 
-  FieldProxyGroup.prototype._bind = function() {
-    return this.el.on("click", ".placeholder", (function(_this) {
-      return function() {
-        _this.trigger("emptySelect");
-        return false;
-      };
-    })(this));
+  FieldProxyGroup.prototype.isEmpty = function() {
+    return this.el.is(".empty");
   };
 
   FieldProxyGroup.prototype.setEmpty = function(empty) {
@@ -316,68 +310,67 @@ Popover = (function(superClass) {
   }
 
   Popover.prototype.opts = {
-    id: null,
     target: null,
-    wrapper: null
+    appendTo: null,
+    offset: null
   };
 
   Popover.instanceCount = 0;
 
   Popover.prototype._init = function() {
-    this.wrapper = $(this.opts.wrapper);
     this.target = $(this.opts.target);
-    this.el = $('<div class="district-popover"></div>').hide().appendTo(this.wrapper);
+    this.el = $('<div class="qing-district-popover"></div>').appendTo(this.opts.appendTo || this.target);
     this.id = ++Popover.instanceCount;
-    return this.el.on("keydown", (function(_this) {
+    this.active = false;
+    return this._bind();
+  };
+
+  Popover.prototype._bind = function() {
+    return $(document).on("click.qing-district-popover-" + this.id, (function(_this) {
       return function(e) {
-        if (e.which === 27) {
-          return _this.setActive(false);
+        if ($(e.target).is(_this.el) || $.contains(_this.el[0], e.target) || $.contains(_this.target[0], e.target)) {
+          return;
         }
+        _this.setActive(false);
+        return null;
       };
     })(this));
   };
 
   Popover.prototype.setActive = function(active) {
+    if (active === this.active) {
+      return;
+    }
     if (active) {
-      return this._show();
+      this.el.addClass('active').appendTo(this.opts.appendTo);
+      this.el.css({
+        width: this.target.width()
+      });
+      this.resetPosition();
+      this.trigger('show');
     } else {
-      return this._hide();
+      this.el.removeClass('active').detach();
+      this.trigger('hide');
     }
+    this.active = active;
+    return this;
   };
 
-  Popover.prototype._show = function() {
-    if (this.el.is(":visible")) {
-      return;
-    }
-    this.el.show();
-    $(document).off("click.qing-district-" + this.id).on("click.qing-district-" + this.id, (function(_this) {
-      return function(e) {
-        var $target;
-        $target = $(e.target);
-        if (!_this.wrapper.hasClass('active')) {
-          return;
-        }
-        if (_this.target.has($target).length || $target.is(_this.target)) {
-          return;
-        }
-        return _this._hide();
-      };
-    })(this));
-    return this.trigger("show");
-  };
-
-  Popover.prototype._hide = function() {
-    if (!this.el.is(":visible")) {
-      return;
-    }
-    $(document).off(".qing-district-" + this.id);
-    this.el.hide();
-    return this.trigger("hide");
+  Popover.prototype.resetPosition = function() {
+    var inputOffset, offsetLeft, offsetTop, wrapperOffset;
+    inputOffset = this.target.offset();
+    wrapperOffset = this.el.offsetParent().offset();
+    offsetTop = inputOffset.top - wrapperOffset.top;
+    offsetLeft = inputOffset.left - wrapperOffset.left;
+    return this.el.css({
+      top: offsetTop + this.target.outerHeight() + this.opts.offset,
+      left: offsetLeft || 0
+    });
   };
 
   Popover.prototype.destroy = function() {
     this.setActive(false);
-    $(document).off(".qing-district-" + this.id);
+    $(document).off(".qing-district-popover-" + this.id);
     return this.el.remove();
   };
 
@@ -414,7 +407,9 @@ QingDistrict = (function(superClass) {
   QingDistrict.opts = {
     el: null,
     dataSource: null,
-    renderer: null
+    renderer: null,
+    popoverAppendTo: 'body',
+    popoverOffset: 12
   };
 
   QingDistrict.locales = {
@@ -467,7 +462,8 @@ QingDistrict = (function(superClass) {
   QingDistrict.prototype._setup = function(data) {
     this.popover = new Popover({
       target: this.el,
-      wrapper: this.wrapper
+      appendTo: this.opts.popoverAppendTo,
+      offset: this.opts.popoverOffset
     });
     this.provinceList = new List({
       wrapper: this.popover.el,
@@ -518,22 +514,15 @@ QingDistrict = (function(superClass) {
         }
       };
     })(this));
-    this.fieldGroup.on("emptySelect", (function(_this) {
+    this.fieldGroup.el.on("click", (function(_this) {
       return function() {
-        if (_this.popover.el.is(":visible")) {
+        if (_this.popover.active) {
           return _this.popover.setActive(false);
-        } else {
+        } else if (_this.fieldGroup.isEmpty()) {
           _this.cityList.hide();
           _this.countyList.hide();
           _this.provinceList.render();
           return _this.popover.setActive(true);
-        }
-      };
-    })(this));
-    this.fieldGroup.el.on("click", (function(_this) {
-      return function() {
-        if (_this.popover.el.is(":visible")) {
-          return _this.popover.setActive(false);
         } else {
           return _this.provinceField.setActive(true);
         }

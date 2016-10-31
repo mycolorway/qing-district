@@ -176,10 +176,11 @@ describe 'QingDistrict', ->
         sinon.spy(qingDistrict.provinceList, "render")
       ]
       popoverSetActive = sinon.spy qingDistrict.popover, "setActive"
-      qingDistrict.fieldGroup.trigger "emptySelect"
-      for spy in spies
-        assert spy.called
-      assert popoverSetActive.calledWith true
+      qingDistrict.fieldGroup.el.trigger "click"
+      setTimeout ->
+        for spy in spies
+          assert spy.called
+        assert popoverSetActive.calledWith true
 
   it "destroy", ->
     qingDistrict.destroy()

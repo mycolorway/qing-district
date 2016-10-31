@@ -6,7 +6,7 @@
  * Released under the MIT license
  * http://mycolorway.github.io/qing-district/license.html
  *
- * Date: 2016-10-12
+ * Date: 2016-11-1
  */
 .qing-district {
   position: relative;
@@ -52,33 +52,33 @@
         outline: 0; }
     .qing-district .district-field-proxy-group .placeholder {
       display: none; }
-  .qing-district .district-popover {
-    position: absolute;
-    box-shadow: 0 0 6px 0 rgba(0, 0, 0, 0.15);
-    top: 48px;
-    left: 0;
-    width: 100%;
-    display: none;
-    padding: 15px;
-    box-sizing: border-box;
-    background: #ffffff;
-    z-index: 10;
-    border: 1px solid #DDDDDD;
-    border-radius: 2px; }
-    .qing-district .district-popover dl {
-      margin: 0 0 10px 0; }
-      .qing-district .district-popover dl:last-child {
-        margin: 0; }
-      .qing-district .district-popover dl dd {
-        margin: 0;
-        white-space: normal; }
-        .qing-district .district-popover dl dd a {
-          display: inline-block;
-          padding: 12px;
-          color: #333333;
-          font-size: 14px;
-          border-radius: 2px; }
-          .qing-district .district-popover dl dd a:hover, .qing-district .district-popover dl dd a:focus {
-            background: #f6f6f6; }
-          .qing-district .district-popover dl dd a:focus {
-            outline: 0; }
+
+.qing-district-popover {
+  display: none;
+  position: absolute;
+  box-shadow: 0 0 6px 0 rgba(0, 0, 0, 0.15);
+  padding: 15px;
+  box-sizing: border-box;
+  background: #ffffff;
+  border: 1px solid #DDDDDD;
+  border-radius: 2px; }
+  .qing-district-popover.active {
+    display: block; }
+  .qing-district-popover dl {
+    margin: 0 0 10px 0; }
+    .qing-district-popover dl:last-child {
+      margin: 0; }
+    .qing-district-popover dl dd {
+      margin: 0;
+      white-space: normal; }
+      .qing-district-popover dl dd a {
+        display: inline-block;
+        padding: 12px;
+        color: #333333;
+        font-size: 14px;
+        border-radius: 2px;
+        text-decoration: none; }
+        .qing-district-popover dl dd a:hover, .qing-district-popover dl dd a:focus {
+          background: #f6f6f6; }
+        .qing-district-popover dl dd a:focus {
+          outline: 0; }

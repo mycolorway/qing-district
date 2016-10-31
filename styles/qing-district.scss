@@ -65,46 +65,49 @@
     }
   }
 
-  .district-popover {
-    position: absolute;
-    box-shadow: 0 0 6px 0 rgba(0,0,0,0.15);
-    top: 48px;
-    left: 0;
-    width: 100%;
-    display: none;
-    padding: 15px;
-    box-sizing: border-box;
-    background: #ffffff;
-    z-index: 10;
-    border: 1px solid #DDDDDD;
-    border-radius: 2px;
+}
 
-    dl {
-      margin: 0 0 10px 0;
+.qing-district-popover {
+  display: none;
+  position: absolute;
+  box-shadow: 0 0 6px 0 rgba(0,0,0,0.15);
+  padding: 15px;
+  box-sizing: border-box;
+  background: #ffffff;
+  border: 1px solid #DDDDDD;
+  border-radius: 2px;
 
-      &:last-child {
-        margin: 0;
-      }
+  &.active {
+    display: block;
+  }
 
-      dd {
-        margin: 0;
-        white-space: normal;
+  dl {
+    margin: 0 0 10px 0;
 
-        a {
-          display: inline-block;
-          padding: 12px;
-          color: #333333;
-          font-size: 14px;
-          border-radius: 2px;
-          &:hover, &:focus {
-            background: #f6f6f6;
-          }
-          &:focus {
-            outline: 0;
-          }
+    &:last-child {
+      margin: 0;
+    }
+
+    dd {
+      margin: 0;
+      white-space: normal;
+
+      a {
+        display: inline-block;
+        padding: 12px;
+        color: #333333;
+        font-size: 14px;
+        border-radius: 2px;
+        text-decoration: none;
+
+        &:hover, &:focus {
+          background: #f6f6f6;
+        }
+        &:focus {
+          outline: 0;
         }
       }
     }
   }
-
 }
+

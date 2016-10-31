@@ -16,12 +16,6 @@ describe "FieldProxyGroup", ->
   it "should append el", ->
     assert.equal 1, $el.find(group.el).length
 
-  it "trigger emptySelect on placeholder", ->
-    spy = sinon.spy()
-    group.on "emptySelect", spy
-    group.el.find(".placeholder").trigger "click"
-    assert spy.called
-
   it "setEmpty", ->
     group.setEmpty true
     assert group.el.is(".empty")

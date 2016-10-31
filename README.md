@@ -53,6 +53,14 @@ __dataSource__
 
 Function; required; should accept an callback to load data
 
+__popoverAppendTo___
+
+Selector/Element/jQuery Object, required, specify the html element. default is 'body'
+
+__popoverOffset__
+
+Number, default is 12
+
 __locales__
 
 Hash, specify locale config, default config is:

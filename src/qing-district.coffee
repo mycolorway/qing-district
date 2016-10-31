@@ -12,6 +12,8 @@ class QingDistrict extends QingModule
     el: null
     dataSource: null
     renderer: null
+    popoverAppendTo: 'body'
+    popoverOffset: 12
 
   @locales:
     placeholder: "Click to select"
@@ -39,6 +41,7 @@ class QingDistrict extends QingModule
     @id = ++ QingDistrict.instanceCount
 
     @_render()
+
     @dataStore = new DataStore()
     @dataStore.on "loaded", (e, data) =>
       @_setup(data)
@@ -62,7 +65,8 @@ class QingDistrict extends QingModule
   _setup: (data) ->
     @popover = new Popover
       target: @el
-      wrapper: @wrapper
+      appendTo: @opts.popoverAppendTo
+      offset: @opts.popoverOffset
 
     @provinceList = new List
       wrapper: @popover.el,
@@ -101,20 +105,16 @@ class QingDistrict extends QingModule
         when 27
           @popover.setActive(false)
 
-    @fieldGroup.on "emptySelect", =>
-      if @popover.el.is(":visible")
-        @popover.setActive(false)
-      else
+    @fieldGroup.el.on "click", =>
+      if @popover.active
+        @popover.setActive false
+      else if @fieldGroup.isEmpty()
         @cityList.hide()
         @countyList.hide()
         @provinceList.render()
-        @popover.setActive(true)
-
-    @fieldGroup.el.on "click", =>
-      if @popover.el.is(":visible")
-        @popover.setActive false
+        @popover.setActive true
       else
-        @provinceField.setActive(true)
+        @provinceField.setActive true
 
     @popover
       .on "show", =>
