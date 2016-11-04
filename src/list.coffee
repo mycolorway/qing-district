@@ -32,10 +32,14 @@ class List extends QingModule
   _bind: ->
     @el.on "click", "a", (e) =>
       $item = $(e.currentTarget)
-      @setCurrent @data[$item.data("code")]
-      @hide()
-      @trigger "afterSelect", [@current]
+      @selectItemByCode $item.data("code")
       false
+
+  selectItemByCode: (code) ->
+    @setCurrent @data[code]
+    @hide()
+    @trigger "select", [@current]
+    @
 
   setCurrent: (item) ->
     @highlightItem @current = item

@@ -6,7 +6,7 @@
  * Released under the MIT license
  * http://mycolorway.github.io/qing-district/license.html
  *
- * Date: 2016-11-1
+ * Date: 2016-11-4
  */
 ;(function(root, factory) {
   if (typeof module === 'object' && module.exports) {
@@ -253,12 +253,17 @@ List = (function(superClass) {
       return function(e) {
         var $item;
         $item = $(e.currentTarget);
-        _this.setCurrent(_this.data[$item.data("code")]);
-        _this.hide();
-        _this.trigger("afterSelect", [_this.current]);
+        _this.selectItemByCode($item.data("code"));
         return false;
       };
     })(this));
+  };
+
+  List.prototype.selectItemByCode = function(code) {
+    this.setCurrent(this.data[code]);
+    this.hide();
+    this.trigger("select", [this.current]);
+    return this;
   };
 
   List.prototype.setCurrent = function(item) {
@@ -418,6 +423,13 @@ QingDistrict = (function(superClass) {
 
   QingDistrict.instanceCount = 0;
 
+  QingDistrict.isMunicipality = function(province, city) {
+    if (!(province && city)) {
+      return false;
+    }
+    return province.cities.length === 1 && city.name === province.name;
+  };
+
   QingDistrict.prototype._setOptions = function(opts) {
     QingDistrict.__super__._setOptions.apply(this, arguments);
     return $.extend(this.opts, QingDistrict.opts, opts);
@@ -556,7 +568,7 @@ QingDistrict = (function(superClass) {
         return _this.popover.setActive(true);
       };
     })(this));
-    this.provinceList.on("afterSelect", (function(_this) {
+    this.provinceList.on("select", (function(_this) {
       return function(e, province) {
         var firstCity;
         _this.fieldGroup.setEmpty(false);
@@ -564,7 +576,7 @@ QingDistrict = (function(superClass) {
         firstCity = _this.cityList.data[province.cities[0]];
         if (_this._isMunicipality(province, firstCity)) {
           _this.cityList.setCurrent(firstCity).hide();
-          _this.cityList.trigger("afterSelect", _this.cityList.current);
+          _this.cityList.trigger("select", _this.cityList.current);
           return _this.cityField.setActive(false);
         } else {
           _this.cityList.setCodes(province.cities).render();
@@ -586,7 +598,7 @@ QingDistrict = (function(superClass) {
         return _this.cityList.setCodes(_this.provinceField.getItem().cities).render();
       };
     })(this));
-    this.cityList.on("afterSelect", (function(_this) {
+    this.cityList.on("select", (function(_this) {
       return function(e, city) {
         _this.fieldGroup.setEmpty(false);
         _this.cityField.setItem(city).highlight(false);
@@ -607,7 +619,7 @@ QingDistrict = (function(superClass) {
         return _this.countyList.setCodes(_this.cityField.getItem().counties).render();
       };
     })(this));
-    return this.countyList.on("afterSelect", (function(_this) {
+    return this.countyList.on("select", (function(_this) {
       return function(e, county) {
         _this.fieldGroup.setEmpty(false);
         _this.countyField.setItem(county).highlight(false);
@@ -629,10 +641,7 @@ QingDistrict = (function(superClass) {
   };
 
   QingDistrict.prototype._isMunicipality = function(province, city) {
-    if (!(province && city)) {
-      return false;
-    }
-    return province.cities.length === 1 && city.name === province.name;
+    return QingDistrict.isMunicipality(province, city);
   };
 
   QingDistrict.prototype._hideAllExcpet = function(type) {
@@ -668,6 +677,10 @@ QingDistrict = (function(superClass) {
   return QingDistrict;
 
 })(QingModule);
+
+QingDistrict.DataStore = DataStore;
+
+QingDistrict.List = List;
 
 module.exports = QingDistrict;
 

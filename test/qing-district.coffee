@@ -123,11 +123,11 @@ describe 'QingDistrict', ->
     it "municipality province", ->
       fieldSpy = sinon.spy qingDistrict.provinceField, "setItem"
       citySpy = sinon.spy()
-      qingDistrict.cityList.on "afterSelect", citySpy
+      qingDistrict.cityList.on "select", citySpy
       cityFieldSpy = sinon.spy qingDistrict.cityField, "setActive"
 
       item = data.province["110000"]
-      qingDistrict.provinceList.trigger "afterSelect", [item]
+      qingDistrict.provinceList.trigger "select", [item]
       assert fieldSpy.calledWith item
       assert citySpy.called
       assert cityFieldSpy.calledWith false
@@ -139,7 +139,7 @@ describe 'QingDistrict', ->
       countyFieldClearSpy = sinon.spy qingDistrict.countyField, "clear"
 
       item = data.province["440000"]
-      qingDistrict.provinceList.trigger "afterSelect", [item]
+      qingDistrict.provinceList.trigger "select", [item]
       assert cityListSpy.called
       assert cityFieldClearSpy.called
       assert countyFieldClearSpy.called

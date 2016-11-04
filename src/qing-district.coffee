@@ -20,6 +20,10 @@ class QingDistrict extends QingModule
 
   @instanceCount: 0
 
+  @isMunicipality: (province, city) ->
+    return false unless province and city
+    province.cities.length == 1 && city.name == province.name
+
   _setOptions: (opts) ->
     super
     $.extend @opts, QingDistrict.opts, opts
@@ -135,13 +139,13 @@ class QingDistrict extends QingModule
       @_hideAllExcpet("province")
       @provinceList.setCurrent(item).show() if item
       @popover.setActive(true)
-    @provinceList.on "afterSelect", (e, province) =>
+    @provinceList.on "select", (e, province) =>
       @fieldGroup.setEmpty(false)
       @provinceField.setItem(province).highlight(false)
       firstCity = @cityList.data[province.cities[0]]
       if @_isMunicipality(province, firstCity)
         @cityList.setCurrent(firstCity).hide()
-        @cityList.trigger "afterSelect", @cityList.current
+        @cityList.trigger "select", @cityList.current
         @cityField.setActive(false)
       else
         @cityList.setCodes(province.cities).render()
@@ -155,7 +159,7 @@ class QingDistrict extends QingModule
         @popover.setActive true
       .on "restore", =>
         @cityList.setCodes(@provinceField.getItem().cities).render()
-    @cityList.on "afterSelect", (e, city) =>
+    @cityList.on "select", (e, city) =>
       @fieldGroup.setEmpty(false)
       @cityField.setItem(city).highlight(false)
       @countyList.setCodes(city.counties).render()
@@ -168,7 +172,7 @@ class QingDistrict extends QingModule
         @popover.setActive true
       .on "restore", =>
         @countyList.setCodes(@cityField.getItem().counties).render()
-    @countyList.on "afterSelect", (e, county) =>
+    @countyList.on "select", (e, county) =>
       @fieldGroup.setEmpty(false)
       @countyField.setItem(county).highlight(false)
       @popover.setActive(false)
@@ -182,8 +186,7 @@ class QingDistrict extends QingModule
     @fieldGroup.setEmpty(false) if @_isFullAny()
 
   _isMunicipality: (province, city) ->
-    return false unless province and city
-    province.cities.length == 1 && city.name == province.name
+    QingDistrict.isMunicipality province, city
 
   _hideAllExcpet: (type) ->
     for _type in ["province", "city", "county"]
@@ -206,5 +209,8 @@ class QingDistrict extends QingModule
     @wrapper.remove()
     @el.removeClass "qing-district"
       .removeData 'qingDistrict'
+
+QingDistrict.DataStore = DataStore
+QingDistrict.List = List
 
 module.exports = QingDistrict

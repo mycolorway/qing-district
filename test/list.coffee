@@ -72,9 +72,9 @@ describe 'List', ->
       list.el.find('a:first').trigger 'click'
       expect(list.el.is(':visible')).to.be.false
 
-    it "should trigger `afterSelect` with item", ->
+    it "should trigger `select` with item", ->
       callback = sinon.spy()
-      list.on "afterSelect", callback
+      list.on "select", callback
       list.el.find('a:first').trigger 'click'
       expect callback.called
         .to.be.true
