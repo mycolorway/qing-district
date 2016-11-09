@@ -6,7 +6,7 @@
  * Released under the MIT license
  * http://mycolorway.github.io/qing-district/license.html
  *
- * Date: 2016-11-4
+ * Date: 2016-11-9
  */
 ;(function(root, factory) {
   if (typeof module === 'object' && module.exports) {
@@ -602,8 +602,12 @@ QingDistrict = (function(superClass) {
       return function(e, city) {
         _this.fieldGroup.setEmpty(false);
         _this.cityField.setItem(city).highlight(false);
-        _this.countyList.setCodes(city.counties).render();
-        return _this.countyField.clear();
+        _this.countyField.clear();
+        if (city.counties.length === 0) {
+          return _this.popover.setActive(false);
+        } else {
+          return _this.countyList.setCodes(city.counties).render();
+        }
       };
     })(this));
     this.countyField.on("active", (function(_this) {
@@ -661,7 +665,13 @@ QingDistrict = (function(superClass) {
   };
 
   QingDistrict.prototype._isFullFilled = function() {
-    return this.provinceField.isFilled() && this.cityField.isFilled() && this.countyField.isFilled();
+    var filled;
+    filled = this.provinceField.isFilled() && this.cityField.isFilled();
+    if (filled && this.cityField.getItem().counties.length === 0) {
+      return filled;
+    } else {
+      return filled && this.countyField.isFilled();
+    }
   };
 
   QingDistrict.prototype._isFullAny = function() {

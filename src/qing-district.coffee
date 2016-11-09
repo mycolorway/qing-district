@@ -162,8 +162,11 @@ class QingDistrict extends QingModule
     @cityList.on "select", (e, city) =>
       @fieldGroup.setEmpty(false)
       @cityField.setItem(city).highlight(false)
-      @countyList.setCodes(city.counties).render()
       @countyField.clear()
+      if city.counties.length == 0
+        @popover.setActive false
+      else
+        @countyList.setCodes(city.counties).render()
 
     @countyField
       .on "active", (e, item) =>
@@ -195,9 +198,11 @@ class QingDistrict extends QingModule
         @["#{_type}Field"].highlight(false)
 
   _isFullFilled: ->
-    @provinceField.isFilled() &&
-    @cityField.isFilled() &&
-    @countyField.isFilled()
+    filled = @provinceField.isFilled() && @cityField.isFilled()
+    if filled && @cityField.getItem().counties.length == 0
+      filled
+    else
+      filled && @countyField.isFilled()
 
   _isFullAny: ->
     @provinceField.isFilled() ||
