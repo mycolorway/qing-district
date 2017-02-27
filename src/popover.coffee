@@ -24,6 +24,7 @@ class Popover extends QingModule
       null
 
   setActive: (active) ->
+    return if @target.hasClass('disabled')
     return if active == @active
 
     if active

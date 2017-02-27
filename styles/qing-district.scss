@@ -19,6 +19,31 @@
     outline: none;
   }
 
+  &.disabled {
+    box-shadow: none;
+    cursor: not-allowed;
+    background: #f6f6f6;
+    border-color: #e6e6e6;
+    color: #ccc;
+
+    .district-field-proxy-group {
+      &.empty {
+        cursor: not-allowed;;
+      }
+
+      .district-field-proxy,
+      .placeholder {
+        color: #ccc;
+        cursor: not-allowed;
+
+        &:hover,
+        &:focus {
+          background-color: transparent;
+        }
+      }
+    }
+  }
+
   a {
     text-decoration: none;
   }
@@ -110,4 +135,3 @@
     }
   }
 }
-

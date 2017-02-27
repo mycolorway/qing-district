@@ -6,7 +6,7 @@
  * Released under the MIT license
  * http://mycolorway.github.io/qing-district/license.html
  *
- * Date: 2016-11-9
+ * Date: 2017-02-26
  */
 ;(function(root, factory) {
   if (typeof module === 'object' && module.exports) {
@@ -343,6 +343,9 @@ Popover = (function(superClass) {
   };
 
   Popover.prototype.setActive = function(active) {
+    if (this.target.hasClass('disabled')) {
+      return;
+    }
     if (active === this.active) {
       return;
     }

@@ -6,7 +6,7 @@
  * Released under the MIT license
  * http://mycolorway.github.io/qing-district/license.html
  *
- * Date: 2016-11-9
+ * Date: 2017-02-26
  */
 .qing-district {
   position: relative;
@@ -23,6 +23,22 @@
     border-color: #ACC6E4;
     box-shadow: 0px 0px 4px 0px rgba(74, 144, 226, 0.5);
     outline: none; }
+  .qing-district.disabled {
+    box-shadow: none;
+    cursor: not-allowed;
+    background: #f6f6f6;
+    border-color: #e6e6e6;
+    color: #ccc; }
+    .qing-district.disabled .district-field-proxy-group.empty {
+      cursor: not-allowed; }
+    .qing-district.disabled .district-field-proxy-group .district-field-proxy,
+    .qing-district.disabled .district-field-proxy-group .placeholder {
+      color: #ccc;
+      cursor: not-allowed; }
+      .qing-district.disabled .district-field-proxy-group .district-field-proxy:hover, .qing-district.disabled .district-field-proxy-group .district-field-proxy:focus,
+      .qing-district.disabled .district-field-proxy-group .placeholder:hover,
+      .qing-district.disabled .district-field-proxy-group .placeholder:focus {
+        background-color: transparent; }
   .qing-district a {
     text-decoration: none; }
   .qing-district .district-field-proxy-group {
